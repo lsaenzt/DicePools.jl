@@ -1,0 +1,86 @@
+function resultschance(n::Int,s::Int,r::Int,rep::Vector{Int})
+    
+    c = collect(multiexponents(r,n)) # Todas las combinaciones de resultado. Ej: los n dados éxito, n-2 éxito, otro blanco y otro fatiga...
+
+    posibilidades = s^n # Todas las posibles combinaciones de caras que pueden salir
+
+    r=Array{Any}(undef,length(c), 2)
+
+    for (i,j) in enumerate(c)
+
+        ordenaciones = factorial(n)/(.*(factorial.(j)...)) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados
+        eventos = ordenaciones*(.*(rep.^j...)) # Todas las posibilidades teniendo en cuenta si hay resultados repeticos en una cara
+        p = eventos/posibilidades*100
+      
+        r[i,1] = j
+        r[i,2] = p
+    end
+
+    r #vector con la combinación de resultados y su probabildad. TODO: Cambiar por una matriz
+end
+
+--------------------------------------------------------------------
+
+function aggregateresults(r::Array,mask::NamedTuple) #¿Poner una Struct como tipo de R?
+
+    a= zeros(Int, size(r,1),length(mask))
+
+    n = Array{Symbol}(undef,length(mask)+1)#Nombres de cada columna de la matriz resultante
+
+    for (i,(j,k)) in enumerate(pairs(mask))
+
+        for l in 1:size(r,1)
+            a[l,i]=sum(k.*r[l]) 
+        end
+
+      n[i]=j #Añado los nombres de la columnas
+    end
+    
+    n[length(mask)+1]=:Probability
+
+hcat(a, r[:,2]), n #Con esta salida se puede hacer DataFrame(output...) para generar una tabla. TODO: ¿Formato que cumpla Tables.jl?
+
+# No sé cómo montar una NamedTuple con nombres+columnas de datos de longitud variable ¿eachcol? ¿splash? ¿collect?
+
+end
+
+
+
+#= function categoricalprobability(n::Int,dice::categoricaldice)
+    
+# 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
+
+    c = collect(multiexponents(length(dice.sidesfreq),n)) # Todas las combinaciones de resultado. Ej: los n dados éxito, n-2 éxito, otro blanco y otro fatiga...
+
+    allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
+
+    r= Array{Any}(undef,length(c), 2)
+
+    for (i,sidecombs) in enumerate(c)
+
+        reord = multinomial(sidecombs...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados blancos y 3 dados éxitos 
+        events = reord*(.*(dice.sidesfreq.^sidecombs...)) # Todas las posibilidades teniendo en cuenta cuando hay caras iguales. Ej: hay 4 caras con resultados blanco en cada dado
+        prob = events/allcomb*100
+      
+        r[i,1] = sidecombs
+        r[i,2] = prob
+        # r is a matrix with each of the possible combination of dice sides and its probability
+    end
+
+# 2. Transforms dice sides into categorical results. E.g.: 1 side type 1 means 1 success and 1 advantage
+
+    a= zeros(Int, size(r,1),length(dice.resulttypes))
+
+    #n = Array{String}(undef,lengthdice.resulttypes)+1) # Nombres de cada columna de la matriz resultante. Tiene que ser un vector de columnas para DataFrames
+
+    for i in 1:size(a,1)
+            a[i,:]=sum(r[i].*dice.resultsinside)
+    end
+
+# 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
+    
+    n = (dice.resulttypes...,:Probability) # vcat creates a copy 
+    
+    (;zip(n,eachcol(hcat(a,r[:,2])))...)
+
+end =#
