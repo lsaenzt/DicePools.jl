@@ -114,15 +114,40 @@ function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldic
 end
  
 """
-    combinedice!(args...)
+    combineresults(r1,r2,rs...)
 
 Combines the results of a tuple of results of dice 
 
-    combinedice(r, t, s)
+    combineresults(r,t,s)
 
 """
 
-function combinedice()
+function combineresults(r1::DiceProbabilities,r2::DiceProbabilities) #TODO: Generalizar a "n" probabilidades
+ 
+    commonnames = intersect(names(r1)[2:end-1],names(r1)[2:end-1]) # Common result types (ignoring dice name). Using Tables.jl accessors
+    othernames = setdiff(union(names(r1)[2:end]-1,names(r2)[2:end-1]),commonnames) # Rest of results (ignoring name). Tables.jl accessors
+     
+    l = length.([data(r1)[:,1],data(r2)[:,1]])
+
+    # Crossjoin basado en DataFrames -> https://github.com/JuliaData/DataFrames.jl/blob/a6910c5212d504d15c23ba13145d3f9ad3995afd/src/abstractdataframe/join.jl#L1232-L1287
+
+    inner = repeat(r1,inner=(l[2],1))
+    outer = repeat(r2,outer=(l[1],1))
+
+    # 1.- Names
+ 
+    n=nothing
+    # 2.- Common results
+
+    c=nothing
+    # 3.- Rest of results
+
+    r=nothing
+    # 4.- Probability
+
+    p=nothing
+
+    DiceProbabilities(n, hcat(c,r,p),Dict([j => i for (i,j) in enumerate(n)]) # New DiceProbabilities object
     
 end
 
