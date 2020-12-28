@@ -22,20 +22,26 @@ function categoricaldice(sides::Array,freq::Array=[]) #User friendly Constructor
     end
     unique!(r) # Unique category of results as Symbol
     
-
     m = [] # count the results of each side
 
-    for i in r # Counts the results present in each side as 1 and 0
-    temp = fill(0,length(sides)) #TODO: esto es Float. Idealmente INT
-        for j in i
-            temp += (j .== sides) 
-        end
-    push!(m,temp)
+    for i in sides # Counts the results present in each side as 1 and 0
+        temp = fill(0,length(r))
+            for j in i
+                temp += (j .== r) 
+            end
+        push!(m,temp)
     end
 
     r = Symbol.(r)
     categoricaldice(sum(freq),freq,r,m) 
 end
+
+macro dice(d) #TODO: investigar macros para utilizar en argumento de "resultsprobabilities" sin tener que escribir variable y su nombre
+    quote
+        $(esc(d)), $(string(d))
+    end
+end
+ 
 
 """
     resultsprobabilities(iter,dice)
@@ -108,11 +114,11 @@ function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldic
 end
  
 """
-    combinedice!(r::DiceProbabilities, t::DiceProbabilities)
+    combinedice!(args...)
 
-Combines the results of two set of dice
+Combines the results of a tuple of results of dice 
 
-    combinedice(r, t)
+    combinedice(r, t, s)
 
 """
 

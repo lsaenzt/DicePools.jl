@@ -30,7 +30,7 @@ using DataFrames, Statistics
 
 @test unique(round.(psum[:,2], digits=2)) == [100.0]
 
-    chance = sort!(combine(groupby(df,[:MY0,:Success]),:Probability => sum => :Probability),[:MY0,:Success]) # Probabities for each number of dice and number of Hits
+    chance = sort!(combine(groupby(tdf,[:MY0,:Success]),:Probability => sum => :Probability),[:MY0,:Success]) # Probabities for each number of dice and number of Hits
 
 @test maximum(chance.Probability)<=100
 
