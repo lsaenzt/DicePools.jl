@@ -60,7 +60,7 @@ La función replica la filosofía del excel DicePools.xlsx
 
     1.- Listado de las posibles combinaciones de resultados según dados. Ej: 3 resultos de 1 éxito, 1 de dos éxitos y otro blanco con 5 dados
     2.- Calcular cuantas ordenaciones existen que den esos resultados. Ej: Primera: dado 1º,2º y 3º, 1 éxito, el 4º dos éxitos y el 5º blanco, 
-                                                                        Segunda: el 1º,2º y 4º, 1 éxito, el 3º dos éxitos y el 5º blanco, etc, etc.
+                                                                       Segunda: el 1º,2º y 4º, 1 éxito, el 3º dos éxitos y el 5º blanco, etc, etc.
     3.- Calcular para una de esas ordenaciones cuantos casos existen teniendo en cuenta que hay resultados que aparecen varias veces (p.ej. si el blanco sale en 3 caras)
     4.- El total de casos posibles son los casos para cada combinación de resultados * las posibles ordenaciones según dados
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
@@ -121,33 +121,51 @@ Combines the results of a tuple of results of dice
     combineresults(r,t,s)
 
 """
-
-function combineresults(r1::DiceProbabilities,r2::DiceProbabilities) #TODO: Generalizar a "n" probabilidades
+function combineresults(r1::DiceProbabilities,r2::DiceProbabilities,r3::DiceProbabilities) #TODO: Generalizar a "n" tablas de probabilidades
  
-    commonnames = intersect(names(r1)[2:end-1],names(r1)[2:end-1]) # Common result types (ignoring dice name). Using Tables.jl accessors
-    othernames = setdiff(union(names(r1)[2:end]-1,names(r2)[2:end-1]),commonnames) # Rest of results (ignoring name). Tables.jl accessors
-     
-    l = length.([data(r1)[:,1],data(r2)[:,1]])
+    rs = (r1,r2,r3)
+    l = size.(data.(rs),1) # Length of each Table
+    L = prod(l) # Total length of output
 
-    # Crossjoin basado en DataFrames -> https://github.com/JuliaData/DataFrames.jl/blob/a6910c5212d504d15c23ba13145d3f9ad3995afd/src/abstractdataframe/join.jl#L1232-L1287
+    # Combinations based on DataFrames implementation -> https://github.com/JuliaData/DataFrames.jl/blob/a6910c5212d504d15c23ba13145d3f9ad3995afd/src/abstractdataframe/join.jl#L1232-L1287
 
-    inner = repeat(r1,inner=(l[2],1))
-    outer = repeat(r2,outer=(l[1],1))
+    # 1.- Dice
+    
+    diename = []
+    n = Array{Int}(undef,L,length(rs))
 
-    # 1.- Names
- 
-    n=nothing
-    # 2.- Common results
+    for (i,j) in enumerate(rs)
+        push!(diename, names(j)[1])
+        num[:,i]= repeat(j[1],outer=div(L,prod(l[i:end])),inner=div(L,prod(l[1:i])))
+    end
 
-    c=nothing
-    # 3.- Rest of results
+    # 2.- Results and consolidation
 
-    r=nothing
-    # 4.- Probability
+    resultname = []
+    r = Array{Int}(undef,L,sum(length.(rs))-length(rs)*2) #Num of data columns is the total minus name column and probability column
+
+    pos = 1
+    for (i,j) in enumerate(rs) #combinations of results data. Ignoring dice names columns and probability column
+        rcol = DicePools.names(j)[2:end-1]
+        ncol = length(rcol)
+        push!(resultname, rcol)
+        r[:,pos:pos+ncol-1]= repeat(DicePools.data(j)[:,2:end-1],outer=(div(L,prod(l[i:end])),1),inner=(div(L,prod(l[1:i])),1))
+        pos+=ncol
+    end
+
+    # Vas por aquí: sumar columnas de resultados con mismo nombre...
+    commonresults = intersect(names(r1)[2:end-1],names(r1)[2:end-1]) # Common result types (ignoring dice name). Using Tables.jl accessors
+
+    # 3.- Probabilities
 
     p=nothing
+    
+    n = (;)  #Column names
 
-    DiceProbabilities(n, hcat(c,r,p),Dict([j => i for (i,j) in enumerate(n)]) # New DiceProbabilities object
+    DiceProbabilities(n, hcat(n,r,p),Dict([j => i for (i,j) in enumerate(n)])) 
+    #= OJO: Un objeto DiceProbabilities permite Tables.jl pero no es correcto porque no funcionaría combineresults por los nombres
+       Solución: incorporar a DiceProbabilities struct un campo con el nº de columnas de nombre que hay
+    =#
     
 end
 
@@ -159,7 +177,6 @@ reroll the dice with specific results
     rerollprobabilities(1:3, MY0, :Blank; name="MY0")
 
 """
-
 function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Symbol; name::String="Dice")
 
 

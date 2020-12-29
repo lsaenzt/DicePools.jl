@@ -4,19 +4,19 @@ using DataFrames, Statistics
 
 # Conan Damage Dice
 
-    Conan_Dmg = DicePools.categoricaldice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2,2])
+    Conan_Dmg = DicePools.categoricaldice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2,2]);
 
-    tdf = DicePools.resultsprobabilities(3:10,Conan_Dmg,name="Conan")|> DataFrame
+    tdf = DicePools.resultsprobabilities(3:10,Conan_Dmg,name="Conan")|> DataFrame;
 
-    psum = combine(groupby(tdf,:Conan),:Probability => sum)
+    psum = combine(groupby(tdf,:Conan),:Probability => sum);
 
 @test unique(round.(psum[:,2], digits=2)) == [100.0] #Test all probabilities add up 100%
 
-    chance = sort!(combine(groupby(tdf,[:Conan,:Hit]),:Probability => sum => :Probability),[:Conan,:Hit]) # Probabities for each number of dice and number of Hits
+    chance = sort!(combine(groupby(tdf,[:Conan,:Hit]),:Probability => sum => :Probability),[:Conan,:Hit]); # Probabities for each number of dice and number of Hits
 
 @test maximum(chance.Probability)<=100
 
-    cumchance = transform(groupby(chance,[:Conan]),[:Hit,:Probability] => ((s,p) -> sum(p.*[s.<=i for i in s])) => :MoreThan)
+    cumchance = transform(groupby(chance,[:Conan]),[:Hit,:Probability] => ((s,p) -> sum(p.*[s.<=i for i in s])) => :MoreThan);
 
 @test maximum(round.(cumchance.MoreThan,digits=2))<=100
 

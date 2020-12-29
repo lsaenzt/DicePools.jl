@@ -1,11 +1,14 @@
 using Tables
 
+export names,data,lookup
+
 # Implementing diceprobabilities as Tables interface compliant for direct reading to DataFrames, CSV...
 
 struct DiceProbabilities <: Tables.AbstractColumns
     names::Tuple
     data::Array
     lookup::Dict{Symbol, Int}
+    #TODO:Implementar nº de columnas nombre+getter para poder usar combineresults de combineresults...
 end
 
 # declare that DiceProbabilities is a table

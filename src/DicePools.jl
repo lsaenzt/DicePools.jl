@@ -7,3 +7,5 @@ include("CategoricalDice.jl")
 include("DiceExamples.jl")
 
 end # module
+
+using .DicePools
