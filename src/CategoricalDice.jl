@@ -1,4 +1,4 @@
-export categoricaldice, resultsprobabilities
+export categoricaldice, resultsprobabilities, combineresults
 
 struct categoricaldice
     sides::Int #e.g. 12
@@ -42,7 +42,6 @@ macro dice(d) #TODO: investigar macros para utilizar en argumento de "resultspro
     end
 end
  
-
 """
     resultsprobabilities(iter,dice)
 
@@ -66,7 +65,7 @@ La función replica la filosofía del excel DicePools.xlsx
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
 
-function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice;name::String="Dice")
+function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,name::String="Dice")
 
    A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2) 
 
@@ -105,68 +104,68 @@ function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldic
     end
 # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
 
-    n = (Symbol(name), dice.resulttypes...,:Probability) # Tuple for direct DataFrame creation
+    n = [Symbol(name), dice.resulttypes...,:Probability]
 
     #TODO:Read name directly from categoricaldice input. Impossible?
     
-    DiceProbabilities(n,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
+    DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
 
 end
  
 """
     combineresults(r1,r2,rs...)
 
-Combines the results of a tuple of results of dice 
+Combines the results into one table 
 
     combineresults(r,t,s)
-
 """
-function combineresults(r1::DiceProbabilities,r2::DiceProbabilities,r3::DiceProbabilities) #TODO: Generalizar a "n" tablas de probabilidades
- 
-    rs = (r1,r2,r3)
+function combineresults(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities...)
+    
+    rs = (r1,r2,ri...)
     l = size.(data.(rs),1) # Length of each Table
     L = prod(l) # Total length of output
 
-    # Combinations based on DataFrames implementation -> https://github.com/JuliaData/DataFrames.jl/blob/a6910c5212d504d15c23ba13145d3f9ad3995afd/src/abstractdataframe/join.jl#L1232-L1287
-
-    # 1.- Dice
+    tempr = Array{Real}(undef,L,sum(length.(rs))) #Num of data columns is the total
     
-    diename = []
-    n = Array{Int}(undef,L,length(rs))
-
-    for (i,j) in enumerate(rs)
-        push!(diename, names(j)[1])
-        num[:,i]= repeat(j[1],outer=div(L,prod(l[i:end])),inner=div(L,prod(l[1:i])))
-    end
-
-    # 2.- Results and consolidation
-
-    resultname = []
-    r = Array{Int}(undef,L,sum(length.(rs))-length(rs)*2) #Num of data columns is the total minus name column and probability column
-
+    # Main table with individual results tables replicated for generating all combinations
+    tempnames = []
     pos = 1
-    for (i,j) in enumerate(rs) #combinations of results data. Ignoring dice names columns and probability column
-        rcol = DicePools.names(j)[2:end-1]
+    for (i,rᵢ) in enumerate(rs)
+        rcol = headers(rᵢ)
         ncol = length(rcol)
-        push!(resultname, rcol)
-        r[:,pos:pos+ncol-1]= repeat(DicePools.data(j)[:,2:end-1],outer=(div(L,prod(l[i:end])),1),inner=(div(L,prod(l[1:i])),1))
+        push!(tempnames, rcol...)
+        tempr[:,pos:pos+ncol-1] = repeat(data(rᵢ),outer=(div(L,prod(l[i:end])),1),inner=(div(L,prod(l[1:i])),1))
         pos+=ncol
     end
-
-    # Vas por aquí: sumar columnas de resultados con mismo nombre...
-    commonresults = intersect(names(r1)[2:end-1],names(r1)[2:end-1]) # Common result types (ignoring dice name). Using Tables.jl accessors
-
-    # 3.- Probabilities
-
-    p=nothing
+  
+    # Headers for output table 
+    colname = []
+    for rᵢ in rs # Dice names first
+        push!(colname, headers(rᵢ)[1:dicenamecols(rᵢ)]...) #Dice name columns
+    end
     
-    n = (;)  #Column names
+    n = length(colname) #number of dice names columns
 
-    DiceProbabilities(n, hcat(n,r,p),Dict([j => i for (i,j) in enumerate(n)])) 
-    #= OJO: Un objeto DiceProbabilities permite Tables.jl pero no es correcto porque no funcionaría combineresults por los nombres
-       Solución: incorporar a DiceProbabilities struct un campo con el nº de columnas de nombre que hay
-    =#
+    for rᵢ in rs # Results later
+        push!(colname, headers(rᵢ)[dicenamecols(rᵢ)+1:end-1]...) # Rest of columns except Probability
+    end
+    colname = union(colname)
+
+    # Column Consolidation
+    r = Array{Real}(undef,L,length(colname)+1) # One more columns for :Probability
+
+    for (i,j) in enumerate(colname)
+
+        r[:,i] = sum(tempr[:,j.==tempnames],dims=2) #Sums columns with the same name as j
+
+    end    
+    # Probability calculation
+        r[:,end] = prod(tempr[:,:Probability.==tempnames],dims=2)./10000 #Sums columns with the same name as j
+ 
+    c = [colname...,:Probability]
     
+    DicePools.DiceProbabilities(c,n,r,Dict([j => i for (i,j) in enumerate(c)]))
+
 end
 
 """
@@ -174,10 +173,10 @@ end
 
 reroll the dice with specific results
 
-    rerollprobabilities(1:3, MY0, :Blank; name="MY0")
+    rerollprobabilities(1:3, MY0_Skill, :Blank,"Push_Skill")
 
 """
-function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Symbol; name::String="Dice")
+function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Symbol, name::String="Dice")
 
 
 end
