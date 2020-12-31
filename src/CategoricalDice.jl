@@ -1,4 +1,4 @@
-export categoricaldice, resultsprobabilities, combineresults
+export categoricaldice, resultsprobabilities, combineresults, rerollprobabilities
 
 struct categoricaldice
     sides::Int #e.g. 12
@@ -175,7 +175,9 @@ reroll the dice with specific results
 
     rerollprobabilities(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
-function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Array{Symbol}, name::String="Dice")
+function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
+
+    (typeof(reroll) == Symbol) && (reroll = [reroll])
 
     roll = resultsprobabilities(iter,dice,name) #First roll
     roll2 = resultsprobabilities(range(0,stop= maximum(iter)),dice,"Reroll") # Base for 2nd roll
