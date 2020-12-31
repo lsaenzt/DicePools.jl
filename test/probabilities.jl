@@ -38,7 +38,10 @@ using DataFrames, Statistics
 
 @test maximum(round.(cumchance.MoreThan,digits=2))<=100
 
-#= ((s,p) -> sum(p.*[s.<=i for i in s]))
+
+
+
+#= Nota explicativa de ((s,p) -> sum(p.*[s.<=i for i in s]))
 
 1.- Pasamos el vector S "success" y el p "probability" 
 2.- Generamos un matriz que tiene para cada fila un vector que indica si S es mayor que el valor individual de fila i

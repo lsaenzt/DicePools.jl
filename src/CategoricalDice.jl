@@ -15,8 +15,8 @@ function categoricaldice(sides::Array,freq::Array=[]) #User friendly Constructor
      
     r = [] # Unique results categories
 
-    for i in sides # Extracts the results categories
-        for j in i
+    for sᵢ in sides # Extracts the results categories
+        for j in sᵢ
             push!(r,j)
         end
     end
@@ -24,9 +24,9 @@ function categoricaldice(sides::Array,freq::Array=[]) #User friendly Constructor
     
     m = [] # count the results of each side
 
-    for i in sides # Counts the results present in each side as 1 and 0
+    for sᵢ in sides # Counts the results present in each side as 1 and 0
         temp = fill(0,length(r))
-            for j in i
+            for j in sᵢ
                 temp += (j .== r) 
             end
         push!(m,temp)
@@ -174,9 +174,42 @@ end
 reroll the dice with specific results
 
     rerollprobabilities(1:3, MY0_Skill, :Blank,"Push_Skill")
-
 """
-function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Symbol, name::String="Dice")
+function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Array{Symbol}, name::String="Dice")
 
+    roll = resultsprobabilities(iter,dice,name) #First roll
+    roll2 = resultsprobabilities(range(0,stop= maximum(iter)),dice,"Reroll") # Base for 2nd roll
+    
+    l₁ = size(data(roll),1) # Length of each Table
+    l₂ = size(data(roll2),1)
+    L = l₁*l₂ # Total length of output
 
+    w = size(data(roll),2) # Width for both roll and reroll
+
+    tempr = Array{Real}(undef,L,2w) #Num of data columns is the total
+        
+    # Main table with the results of the roll combined with itself
+    tempr[:,1:w] = repeat(data(roll),outer=(l₂,1),inner=(1,1))
+    tempr[:,w+1:end] = repeat(data(roll2),outer=(1,1),inner=(l₁,1))
+    allnames=[headers(roll)...,headers(roll2)...] # Colnames
+
+    # Eliminate rows where dice of the second roll are not equal to the rerolled dice
+    cols = (|).([i.==headers(roll) for i in reroll]...) # For selecting columns of results to be rerolled. "(|)." means "or" 
+    rerolled = sum(data(roll)[:,cols],dims=2) |> vec # Number of dice to be rerolled for each row. Note: "Vec" is used because rerolled is a matrix
+    tempr = tempr[tempr[:,w+1].==repeat(rerolled,l₂),:] # Keeps rows where dice equals rerolled. 
+
+    # Column Consolidation
+    colnames=[headers(roll)[1],:Reroll,headers(roll)[2:end-1]...] # Reordered Colnames
+    r = Array{Real}(undef,size(tempr,1),length(colnames)+1) # One more columns for :Probability
+
+    for (i,j) in enumerate(colnames) 
+        r[:,i] = sum(tempr[:,j.==allnames],dims=2) #Sums columns with the same name as j
+    end  
+
+    # Probability calculation
+        r[:,end] = prod(tempr[:,:Probability.==allnames],dims=2)./100 #Sums columns with the same name as j
+ 
+    c = [colnames...,:Probability] # Adds :Probability to column names
+    
+    DicePools.DiceProbabilities(c,2,r,Dict([j => i for (i,j) in enumerate(c)]))
 end

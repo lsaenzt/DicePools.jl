@@ -1,6 +1,6 @@
 using Tables
 
-export headers,data,lookup,dicenamecols
+export headers,data,lookup,dicenamecols # ¿debería exportarse esto?
 
 # Implementing diceprobabilities as Tables interface compliant for direct reading to DataFrames, CSV...
 
@@ -9,7 +9,6 @@ struct DiceProbabilities <: Tables.AbstractColumns
     dicenamecols::Int
     data::Array{Real}
     lookup::Dict{Symbol, Int}
-    #TODO:Implementar nº de columnas nombre+getter para poder usar combineresults de combineresults...
 end
 
 # declare that DiceProbabilities is a table
