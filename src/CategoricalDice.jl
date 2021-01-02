@@ -175,6 +175,7 @@ reroll the dice with specific results
 
     rerollprobabilities(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
+#TODO Complejo: incluir una regla para reroll e.j. :Blank if :Harm == 0 ¬:Bread ==0
 function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
 
     (typeof(reroll) == Symbol) && (reroll = [reroll])

@@ -14,7 +14,7 @@ Conan_Dmg = categoricaldice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[
 
 □ = categoricaldice([["Blank"],["Success"],["Success","Advantage"],["Advantage","Advantage"],["Advantage"]],[2,1,1,1,1]) #Boost
 ■ = categoricaldice([["Blank"],["Failure"],["Threat"]],[2,2,2])                                                          #Setback
-♢ = categoricaldice([["Blank"],["Success"],["Success","Success"],["Advantage"],["Success","Advantage"],["Advantage","Advantage"]],[1,2,1,2,1,1]) 
+♢ = categoricaldice([["Blank"],["Success"],["Success","Success"],["Advantage"],["Success","Advantage"],["Advantage","Advantage"]],[1,2,1,2,1,1]) # Ability
 #=
 ◈ = 
 ⬠ = 

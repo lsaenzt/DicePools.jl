@@ -39,8 +39,6 @@ using DataFrames, Statistics
 @test maximum(round.(cumchance.MoreThan,digits=2))<=100
 
 
-
-
 #= Nota explicativa de ((s,p) -> sum(p.*[s.<=i for i in s]))
 
 1.- Pasamos el vector S "success" y el p "probability" 
