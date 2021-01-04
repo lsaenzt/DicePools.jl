@@ -4,7 +4,7 @@ using DataFrames, Statistics
 
 # Conan Damage Dice
 
-    Conan_Dmg = DicePools.categoricaldice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2,2]);
+    Conan_Dmg = DicePools.CategoricalDice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2,2]);
 
     tdf = DicePools.resultsprobabilities(3:10,Conan_Dmg,name="Conan")|> DataFrame;
 
@@ -22,7 +22,7 @@ using DataFrames, Statistics
 
 # MYZ Attribute Dice
 
-    MY0_Attr = DicePools.categoricaldice([["Success"],["Blank"],["Harm"]],[1,4,1])
+    MY0_Attr = DicePools.CategoricalDice([["Success"],["Blank"],["Harm"]],[1,4,1])
 
     tdf = DicePools.resultsprobabilities(1:15,MY0_Attr,name="MY0")|> DataFrame
 

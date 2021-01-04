@@ -51,7 +51,7 @@ function test(r1,r2,r3)
 
 end
 
-function reroll(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Array{Symbol}, name::String="Dice")
+function reroll(iter::Union{Int,OrdinalRange},dice::CategoricalDice,reroll::Array{Symbol}, name::String="Dice")
 
     roll = resultsprobabilities(iter,dice,name)
     roll2 = resultsprobabilities(range(0,stop= maximum(iter)),dice,"Reroll")

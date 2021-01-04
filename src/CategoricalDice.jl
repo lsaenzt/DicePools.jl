@@ -1,13 +1,13 @@
-export categoricaldice, resultsprobabilities, combineresults, rerollprobabilities
+export CategoricalDice, resultsprobabilities, combineresults, rerollprobabilities
 
-struct categoricaldice
+struct CategoricalDice
     sides::Int #e.g. 12
-    sidesfreq::Vector #[1,2,2,1,3,2,1]
-    resulttypes::Vector #[:blank, :success, :advantage, :triumph]
-    resultsinside::Vector #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
+    sidesfreq::Vector{Int} #[1,2,2,1,3,2,1]
+    resulttypes::Vector{Symbol} #[:blank, :success, :advantage, :triumph]
+    resultsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
 end
 
-function categoricaldice(sides::Array,freq::Array=[]) #User friendly Constructor for categorial dice
+function CategoricalDice(sides::Array,freq::Array=[]) #User friendly Constructor for categorial dice
     
     #TODO: identificar caras repetidas y unirlas
     (freq==[]) && (freq = ones(length(r))) #If f is empty then each results happens once in the dice
@@ -33,7 +33,7 @@ function categoricaldice(sides::Array,freq::Array=[]) #User friendly Constructor
     end
 
     r = Symbol.(r)
-    categoricaldice(sum(freq),freq,r,m) 
+    CategoricalDice(sum(freq),freq,r,m) 
 end
 
 macro dice(d) #TODO: investigar macros para utilizar en argumento de "resultsprobabilities" sin tener que escribir variable y su nombre
@@ -47,7 +47,7 @@ end
 
 #Arguments
     - iter::Union{Int,OrdinalRange} -> number of dice o a range of values (E.g. 1:10)
-    - dice::categoricaldice -> an already defined dice 
+    - dice::CategoricalDice -> an already defined dice 
     - name::String="Dice" -> name of the dice to be used as output 
 
 # Returns a Namedtuple with column names and values: 
@@ -65,7 +65,7 @@ La función replica la filosofía del excel DicePools.xlsx
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
 
-function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,name::String="Dice")
+function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::CategoricalDice,name::String="Dice")
 
    A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2) 
 
@@ -106,7 +106,7 @@ function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldic
 
     n = [Symbol(name), dice.resulttypes...,:Probability]
 
-    #TODO:Read name directly from categoricaldice input. Impossible?
+    #TODO:Read name directly from CategoricalDice input. Impossible?
     
     DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
 
@@ -176,7 +176,7 @@ reroll the dice with specific results
     rerollprobabilities(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
 #TODO Complejo: incluir una regla para reroll e.j. :Blank if :Harm == 0 ¬:Bread ==0
-function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::categoricaldice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
+function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::CategoricalDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
 
     (typeof(reroll) == Symbol) && (reroll = [reroll])
 
