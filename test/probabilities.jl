@@ -6,7 +6,7 @@ using DataFrames, Statistics
 
     Conan_Dmg = DicePools.CategoricalDice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2,2]);
 
-    tdf = DicePools.resultsprobabilities(3:10,Conan_Dmg,name="Conan")|> DataFrame;
+    tdf = DicePools.roll(3:10,Conan_Dmg,name="Conan")|> DataFrame;
 
     psum = combine(groupby(tdf,:Conan),:Probability => sum);
 
@@ -24,7 +24,7 @@ using DataFrames, Statistics
 
     MY0_Attr = DicePools.CategoricalDice([["Success"],["Blank"],["Harm"]],[1,4,1])
 
-    tdf = DicePools.resultsprobabilities(1:15,MY0_Attr,name="MY0")|> DataFrame
+    tdf = DicePools.roll(1:15,MY0_Attr,name="MY0")|> DataFrame
 
     psum = combine(groupby(tdf,:MY0),:Probability => sum) 
 

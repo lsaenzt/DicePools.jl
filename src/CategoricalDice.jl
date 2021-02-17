@@ -1,4 +1,4 @@
-export CategoricalDice, resultsprobabilities, combineresults, rerollprobabilities
+export CategoricalDice, roll, combineresults, reroll
 
 struct CategoricalDice
     sides::Int #e.g. 12
@@ -43,7 +43,7 @@ macro dice(d) #TODO: investigar macros para utilizar en argumento de "resultspro
 end
  
 """
-    resultsprobabilities(iter,dice)
+    roll(iter,dice)
 
 #Arguments
     - iter::Union{Int,OrdinalRange} -> number of dice o a range of values (E.g. 1:10)
@@ -65,7 +65,7 @@ La función replica la filosofía del excel DicePools.xlsx
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
 
-function resultsprobabilities(iter::Union{Int,OrdinalRange},dice::CategoricalDice,name::String="Dice")
+function roll(iter::Union{Int,OrdinalRange},dice::CategoricalDice,name::String="Dice")
 
    A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2) 
 
@@ -169,14 +169,14 @@ function combineresults(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProb
 end
 
 """
-    rerollprobabilities(iter, dice::categorical,reroll::Symbol, name::String="Dice")
+    reroll(iter, dice::categorical,reroll::Symbol, name::String="Dice")
 
 reroll the dice with specific results
 
-    rerollprobabilities(1:3, MY0_Skill, :Blank,"Push_Skill")
+    reroll(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
 #TODO Complejo: incluir una regla para reroll e.j. :Blank if :Harm == 0 ¬:Bread ==0
-function rerollprobabilities(iter::Union{Int,OrdinalRange},dice::CategoricalDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
+function reroll(iter::Union{Int,OrdinalRange},dice::CategoricalDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
 
     (typeof(reroll) == Symbol) && (reroll = [reroll])
 
