@@ -1,4 +1,14 @@
-export MY0_Skill,MY0_Eq,MY0_Attr,Conan_Dmg,□,■,♢
+export d4,d6,d8,d12,d20,d100,fudge,MY0_Skill,MY0_Eq,MY0_Attr,Conan_Dmg,□,■,♢
+
+# NumericDice
+ d4 = NumericDice(4)
+ d6 = NumericDice(6)
+ d8 = NumericDice(8)
+ d10 = NumericDice(10)
+ d12 = NumericDice(12)
+ d20 = NumericDice(20)
+ d100 = NumericDice(100)
+ fudge = NumericDice([-1,0,1])
 
 # Year-Zero Engine Dice
 

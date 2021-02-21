@@ -5,3 +5,7 @@ function dndabilities()
     end
     return sort(a,rev = true)
 end
+
+function roll(d::NumericDice)
+    rand(d.results)
+end
