@@ -1,15 +1,6 @@
-using Tables
-
 export headers,data,lookup,dicenamecols # ¿debería exportarse esto?
 
 # Implementing diceprobabilities as Tables interface compliant for direct reading to DataFrames, CSV...
-
-struct DiceProbabilities <: Tables.AbstractColumns
-    headers::Vector{Symbol}
-    dicenamecols::Int
-    data::Array{Real}
-    lookup::Dict{Symbol, Int}
-end
 
 # declare that DiceProbabilities is a table
 Tables.istable(::Type{<:DiceProbabilities}) = true

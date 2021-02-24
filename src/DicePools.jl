@@ -1,12 +1,14 @@
 module DicePools
 
-using Combinatorics, OrderedCollections
+using Combinatorics
+using OrderedCollections
+using Tables
 
 export roll, combineresults, reroll
 
-include("TablesInterface.jl")
 include("DiceTypes.jl")
-include("CategoricalDice.jl")
+include("TablesInterface.jl")
+include("DescriptiveDice.jl")
 include("NumericDice.jl")
 include("DiceExamples.jl")
 

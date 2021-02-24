@@ -28,16 +28,16 @@ La función replica la filosofía del excel DicePools.xlsx
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
 
-function roll(iter::Union{Int,OrdinalRange},dice::CategoricalDice,name::String="Dice")
+function roll(N::Union{Int,OrdinalRange},dice::DescriptiveDice,name::String="Dice")
 
    A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2) 
 
-   for i in iter
+   for n in N
    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
 
-    c = multiexponents(length(dice.sidesfreq),i)  # multiexponents return an iterable
+    c = multiexponents(length(dice.sidesfreq),n)  # multiexponents return an iterable
     
-    allcomb = dice.sides^i # Todas las posibles combinaciones de caras que pueden salir
+    allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
 
     r= Array{Any}(undef,length(c), 2)
 
@@ -62,7 +62,7 @@ function roll(iter::Union{Int,OrdinalRange},dice::CategoricalDice,name::String="
             a[k,:]=sum(r[k].*dice.resultsinside)
     end
 
-    A = vcat(A,hcat(fill(i,size(a,1)),a,r[:,2])) #Accumulates all results into one matrix. Number od dice, results and probability
+    A = vcat(A,hcat(fill(n,size(a,1)),a,r[:,2])) #Accumulates all results into one matrix. Number od dice, results and probability
 
     end
 # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
@@ -139,7 +139,7 @@ reroll the dice with specific results
     reroll(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
 #TODO Complejo: incluir una regla para reroll e.j. :Blank if :Harm == 0 ¬:Bread ==0
-function reroll(iter::Union{Int,OrdinalRange},dice::CategoricalDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
+function reroll(iter::Union{Int,OrdinalRange},dice::DescriptiveDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
 
     (typeof(reroll) == Symbol) && (reroll = [reroll])
 

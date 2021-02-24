@@ -1,104 +1,78 @@
-
 # TODO: Crear macro para @roll 3d6 
 # Iterator.product es una alternativa para crear todas las combinaciones
-# TODO: evaluar alternativa con https://mathworld.wolfram.com/Dice.html y multinomials
+# CHECK for drop lowest-highest:https://stackoverflow.com/questions/50690348/calculate-probability-of-a-fair-dice-roll-in-non-exponential-time
 
-# Todavía no funciona:
-function testroll(n::Int, s::Int)
-    for p in n:s*n
-        c=0
-        for k in 0:floor(Int,(p-n)/s)
-           c = c + (-1)^k*binomial(n,k)*binomial(p-s*k-1,n-1)
-        end
-        println(p," ",c/(s^n)*100)
-    end   
-end
-#  also https://stackoverflow.com/questions/50690348/calculate-probability-of-a-fair-dice-roll-in-non-exponential-time
-
-
-"This method is for standard numeric rolls. E.g. 3d6"
-function roll(iter::Union{Int,OrdinalRange},dice::StandardDice,name::String="Dice")
+"Fast method for standard numeric rolls. E.g. 3d6" #TODO: add modifier to name -> d6+1
+function roll(N::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0,name::String=string("d",dice.sides))
 
     A = Array{Int64,2}(undef,0,3) 
     s = dice.sides
 
-    for n in iter
-    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
- 
-     # Basado en https://mathworld.wolfram.com/Dice.html. Es súperrápido
+    for n in N # n number of dice to roll
 
+     # Based on https://mathworld.wolfram.com/Dice.html. Superfast
      allcomb = s^n # Todas las posibles combinaciones de caras que pueden salir
  
-     # Inicializo un array para almacenar los resultados con el rango de valores posibles
-     r = zeros(n*s-n+1,2) #n*s es el máximo resultado y n el mínimo para un dado standard
+     # Initializes array for storing results
+     r = zeros(n*s-n+1,2) # Array length is max result minus min result
 
-     for p in n:s*n
-        c=0
-        for k in 0:floor(Int,(p-n)/s)
-           c = c + (-1)^k*binomial(n,k)*binomial(p-s*k-1,n-1)
+        for p in n:s*n # Computes 'c' as described in https://mathworld.wolfram.com/Dice.html
+            c=0
+            for k in 0:floor(Int,(p-n)/s)
+            c = c + (-1)^k*binomial(n,k)*binomial(p-s*k-1,n-1)
+            end
+            r[p-n+1,1] = p + mod
+            r[p-n+1,2] = c/allcomb*100
         end
-        r[p-n+1,1] = p + dice.modifier
-        r[p-n+1,2] = c/allcomb*100
-    end
       
- # 2. Concatenate results
-
+    # Concatenate results for each n
     A = vcat(A,hcat(fill(n,n*s-n+1),r))
 
     end
- # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
- 
-     n = [Symbol(name),:Result,:Probability]
- 
-     #TODO:Read name directly from CategoricalDice input. Impossible?
-     
-     DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
- 
- end
+    # Creates a DiceProbabilities struct that is Tables.jl compliant 
+     n = [Symbol(name),:Result,:Probability]   
+     DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Tables.jl compliant
+end
 
- """
-This method allows to apply a function to each result
 """
-
-function roll(iter::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice")
-    A = Array{Int64,2}(undef,0,3) 
+This method is for non-standard numeric dice. E.g: Fugde dice
+Calculation is done iterating over the possible results
+"""
+# TODO: Read name directly from CategoricalDice input. Impossible?
  
-    for i in iter
+function roll(N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
+    
+    A = Array{Int64,2}(undef,0,3)
+ 
+    for n in N
     # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
  
       # Todas las combinaciones de resultado. Ej: 1) 6 ochos 2) 3 seises, 2 unos y 1 tres...
-     c = with_replacement_combinations(dice.results,i)
-     allcomb = dice.sides^i # Todas las posibles combinaciones de caras que pueden salir
+     c = multiexponents(dice.sides,n)
+
+     allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
  
      r = Dict{Int, Number}()
  
-        for (j,numbercombs) in enumerate(c)
-            l=1
-            for k in 2:i
-                (numbercombs[k] != numbercombs[k-1]) && (l=l+1)
-            end
-            # Revisar esta línea. Tarda mucho
-            reord = factorial(i,i-l+1) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
-            prob = reord/allcomb*100
-            
-            s= sum(numbercombs) + dice.modifier
+        for cᵢ in c
 
+            reord = multinomial(cᵢ...) # Variaciones: todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
+            prob = reord/allcomb*100            
+            s = sum(cᵢ.*dice.results) + mod
             r[s] = get(r,s,0) + prob
             
         end
 
-     rₛ = sort(r)
- # 2. Concatenate results
+        
+     
+ # 2. Concatenates results
 
-    A = vcat(A,hcat(fill(i,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
+    A = vcat(A,hcat(fill(n,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
 
     end
  # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
  
-     n = [Symbol(name),:Result,:Probability]
- 
-     #TODO:Read name directly from CategoricalDice input. Impossible?
-     
+     n = [Symbol(name),:Result,:Probability]   
      DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
  end
 
@@ -110,32 +84,32 @@ e.g. drop lowet
     sum(r[2:end])
  end
 
-NOT TESTED
+NOT TESTED. DOES NOT WORK WITH STANDARDICE!!!
 
 """
 
-function roll(f::Function,iter::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice")
+function roll(f::Function,N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
     A = Array{Int64,2}(undef,0,3) 
  
-    for i in iter
+    for n in N
     # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
  
       # Todas las combinaciones de resultado. Ej: 1) 6 ochos 2) 3 seises, 2 unos y 1 tres...
-     c = with_replacement_combinations(dice.results,i)
-     allcomb = dice.sides^i # Todas las posibles combinaciones de caras que pueden salir
+     c = with_replacement_combinations(dice.results,n)
+     allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
  
      r = Dict{Int, Number}()
  
         for (j,numbercombs) in enumerate(c)
             l=1
-            for k in 2:i
+            for k in 2:n
                 (numbercombs[k] != numbercombs[k-1]) && (l=l+1)
             end
             # Revisar esta línea. Tarda mucho
-            reord = factorial(i,i-l+1) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
+            reord = factorial(n,n-l+1) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
             prob = reord/allcomb*100
             
-            s= f(numbercombs) + dice.modifier
+            s= f(numbercombs) + mod
 
             r[s] = get(r,s,0) + prob
             
@@ -144,7 +118,7 @@ function roll(f::Function,iter::Union{Int,OrdinalRange},dice::NumericDice,name::
      rₛ = sort(r)
  # 2. Concatenate results
 
-    A = vcat(A,hcat(fill(i,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
+    A = vcat(A,hcat(fill(n,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
 
     end
  # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
