@@ -63,7 +63,7 @@ function roll(N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::Stri
             
         end
 
-        
+     rₛ = sort(r)
      
  # 2. Concatenates results
 
