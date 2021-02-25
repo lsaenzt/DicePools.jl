@@ -23,14 +23,14 @@ CustomDice(r::Vector{Int}) = CustomDice(length(r),r)
 StandardDice(s::Int) = StandardDice(s,1:s)
 
 "Categorical dice produce descriptive results that are combined"
-struct DescriptiveDice <: Dice 
+struct SymbolDice <: Dice 
     sides::Int #e.g. 12
     sidesfreq::Vector{Int} #[1,2,2,1,3,2,1]
     resulttypes::Vector{Symbol} #[:blank, :success, :advantage, :triumph]
     resultsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
 end
 
-function DescriptiveDice(sides::Array,freq::Array=[]) #User friendly Constructor for categorial dice
+function SymbolDice(sides::Array,freq::Array=[]) #User friendly Constructor for categorial dice
     
     #TODO: identificar caras repetidas y unirlas
     (freq==[]) && (freq = ones(length(r))) #If f is empty then each results happens once in the dice
@@ -56,7 +56,7 @@ function DescriptiveDice(sides::Array,freq::Array=[]) #User friendly Constructor
     end
 
     r = Symbol.(r)
-    DescriptiveDice(sum(freq),freq,r,m) 
+    SymbolDice(sum(freq),freq,r,m) 
 end
 
 

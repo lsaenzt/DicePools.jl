@@ -28,7 +28,7 @@ La función replica la filosofía del excel DicePools.xlsx
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
 
-function roll(N::Union{Int,OrdinalRange},dice::DescriptiveDice,name::String="Dice")
+function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 
    A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2) 
 
@@ -139,7 +139,7 @@ reroll the dice with specific results
     reroll(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
 #TODO Complejo: incluir una regla para reroll e.j. :Blank if :Harm == 0 ¬:Bread ==0
-function reroll(iter::Union{Int,OrdinalRange},dice::DescriptiveDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
+function reroll(iter::Union{Int,OrdinalRange},dice::SymbolDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
 
     (typeof(reroll) == Symbol) && (reroll = [reroll])
 

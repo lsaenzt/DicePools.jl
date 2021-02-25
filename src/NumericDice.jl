@@ -52,7 +52,7 @@ function roll(N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::Stri
 
      allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
  
-     r = Dict{Int, Number}()
+     r = OrderedDict{Int, Number}()
  
         for cᵢ in c
 
@@ -100,16 +100,16 @@ function roll(f::Function,N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=
  
      r = Dict{Int, Number}()
  
-        for (j,numbercombs) in enumerate(c)
-            l=1
-            for k in 2:n
-                (numbercombs[k] != numbercombs[k-1]) && (l=l+1)
-            end
+        for (j,cᵢ) in enumerate(c)
+            
+            u = unique(collect(cᵢ))
+            freq = (sum([i == x for i in cᵢ]) for x in u)
+
             # Revisar esta línea. Tarda mucho
-            reord = factorial(n,n-l+1) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
+            reord = multinomial(freq...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
             prob = reord/allcomb*100
             
-            s= f(numbercombs) + mod
+            s= sum(f(cᵢ)) + mod
 
             r[s] = get(r,s,0) + prob
             
@@ -129,3 +129,4 @@ function roll(f::Function,N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=
      
      DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
  end
+ 
