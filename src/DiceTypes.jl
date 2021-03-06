@@ -1,4 +1,4 @@
-export CategoricalDice, NumericDice, StandardDice #HybridDice
+export CategoricalDice, CustomDice, StandardDice #HybridDice
 
 abstract type Dice end
 "Numeric dice have results that are numbers to be summed"

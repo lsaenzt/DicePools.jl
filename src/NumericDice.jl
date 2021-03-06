@@ -1,32 +1,33 @@
 # TODO: Crear macro para @roll 3d6 
 # Iterator.product es una alternativa para crear todas las combinaciones
-# CHECK for drop lowest-highest:https://stackoverflow.com/questions/50690348/calculate-probability-of-a-fair-dice-roll-in-non-exponential-time
 
+using Memoize
+@memoize multinomialₘₑₘ(k::Vector{Int}) =  multinomial(k...) # No funciona porque cada resultado de multiexponent es diferente
+
+# A partir de cierto número hacer overflow ¿BigInt?
 "Fast method for standard numeric rolls. E.g. 3d6" #TODO: add modifier to name -> d6+1
-function roll(N::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0,name::String=string("d",dice.sides))
+function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0,name::String=string("d",dice.sides))
 
     A = Array{Int64,2}(undef,0,3) 
     s = dice.sides
 
-    for n in N # n number of dice to roll
-
+    for nᵢ in n  # n number of dice to roll
      # Based on https://mathworld.wolfram.com/Dice.html. Superfast
-     allcomb = s^n # Todas las posibles combinaciones de caras que pueden salir
- 
+     allcomb = s^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
      # Initializes array for storing results
-     r = zeros(n*s-n+1,2) # Array length is max result minus min result
+     r = zeros(nᵢ*s-nᵢ+1,2) # Array length is max result minus min result
 
-        for p in n:s*n # Computes 'c' as described in https://mathworld.wolfram.com/Dice.html
+        for p in nᵢ:s*nᵢ # Computes 'c' as described in https://mathworld.wolfram.com/Dice.html
             c=0
-            for k in 0:floor(Int,(p-n)/s)
-            c = c + (-1)^k*binomial(n,k)*binomial(p-s*k-1,n-1)
+            for k in 0:floor(Int,(p-nᵢ)/s)
+            c = c + (-1)^k*binomial(nᵢ,k)*binomial(p-s*k-1,nᵢ-1)
             end
-            r[p-n+1,1] = p + mod
-            r[p-n+1,2] = c/allcomb*100
+            r[p-nᵢ+1,1] = p + mod
+            r[p-nᵢ+1,2] = c/allcomb*100
         end
       
     # Concatenate results for each n
-    A = vcat(A,hcat(fill(n,n*s-n+1),r))
+    A = vcat(A,hcat(fill(nᵢ,nᵢ*s-nᵢ+1),r))
 
     end
     # Creates a DiceProbabilities struct that is Tables.jl compliant 
@@ -40,33 +41,27 @@ Calculation is done iterating over the possible results
 """
 # TODO: Read name directly from CategoricalDice input. Impossible?
  
-function roll(N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
+function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
     
     A = Array{Int64,2}(undef,0,3)
  
-    for n in N
+    for nᵢ in n
     # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
- 
-      # Todas las combinaciones de resultado. Ej: 1) 6 ochos 2) 3 seises, 2 unos y 1 tres...
-     c = multiexponents(dice.sides,n)
-
-     allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
- 
+    # Todas las combinaciones de resultado. Ej: 1) 6 ochos 2) 3 seises, 2 unos y 1 tres...
+     c = multiexponents(dice.sides,nᵢ)
+     allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
      r = OrderedDict{Int, Number}()
  
         for cᵢ in c
-
-            reord = multinomial(cᵢ...) # Variaciones: todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
+            reord = multinomial(cᵢ) # Variaciones: todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
             prob = reord/allcomb*100            
             s = sum(cᵢ.*dice.results) + mod
-            r[s] = get(r,s,0) + prob
-            
+            r[s] = get(r,s,0) + prob         
         end
 
      rₛ = sort(r)
      
  # 2. Concatenates results
-
     A = vcat(A,hcat(fill(n,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
 
     end
@@ -79,54 +74,37 @@ function roll(N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::Stri
 """
 This method allows to apply a function to each result
 
-e.g. drop lowet
+e.g. drop lowest
  roll(3,d6) do r
     sum(r[2:end])
  end
-
-NOT TESTED. DOES NOT WORK WITH STANDARDICE!!!
-
 """
-
-function roll(f::Function,N::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
+# RAPIDLY COLLAPSES...
+function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
+   
     A = Array{Int64,2}(undef,0,3) 
  
-    for n in N
-    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
+    for nᵢ in n
+     # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
+     c = with_replacement_combinations(dice.results,nᵢ)
+     m = multiexponents(dice.sides,nᵢ)
+     allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
+     r = OrderedDict{Int, Number}()
  
-      # Todas las combinaciones de resultado. Ej: 1) 6 ochos 2) 3 seises, 2 unos y 1 tres...
-     c = with_replacement_combinations(dice.results,n)
-     allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
- 
-     r = Dict{Int, Number}()
- 
-        for (j,cᵢ) in enumerate(c)
-            
-            u = unique(collect(cᵢ))
-            freq = (sum([i == x for i in cᵢ]) for x in u)
-
-            # Revisar esta línea. Tarda mucho
-            reord = multinomial(freq...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
+        for (cᵢ,mᵢ) in zip(c,m)          
+            reord = multinomial(mᵢ...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
             prob = reord/allcomb*100
-            
             s= sum(f(cᵢ)) + mod
-
-            r[s] = get(r,s,0) + prob
-            
+            r[s] = get(r,s,0) + prob            
         end
 
      rₛ = sort(r)
  # 2. Concatenate results
-
     A = vcat(A,hcat(fill(n,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
 
     end
- # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
- 
-     n = [Symbol(name),:Result,:Probability]
- 
-     #TODO:Read name directly from CategoricalDice input. Impossible?
-     
+ # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame 
+     n = [Symbol(name),:Result,:Probability] 
+     #TODO:Read name directly from CategoricalDice input. Impossible?     
      DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
  end
- 
