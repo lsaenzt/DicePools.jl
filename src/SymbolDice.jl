@@ -67,11 +67,11 @@ function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
     end
 # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
 
-    n = [Symbol(name), dice.resulttypes...,:Probability]
+    cols = [Symbol(name), dice.resulttypes...,:Probability]
 
     #TODO:Read name directly from CategoricalDice input. Impossible?
     
-    DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
+    DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 
 end
  
@@ -125,9 +125,9 @@ function combineresults(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProb
     # Probability calculation
         r[:,end] = prod(tempr[:,:Probability.==tempnames],dims=2)./10000 #Sums columns with the same name as j
  
-    c = [colname...,:Probability]
+    cols = [colname...,:Probability]
     
-    DicePools.DiceProbabilities(c,n,r,Dict([j => i for (i,j) in enumerate(c)]))
+    DicePools.DiceProbabilities(c,n,r,Dict([j => i for (i,j) in enumerate(cols)]))
 
 end
 
@@ -175,7 +175,7 @@ function reroll(iter::Union{Int,OrdinalRange},dice::SymbolDice,reroll::Union{Sym
     # Probability calculation
         r[:,end] = prod(tempr[:,:Probability.==allnames],dims=2)./100 #Sums columns with the same name as j
  
-    c = [colnames...,:Probability] # Adds :Probability to column names
+    cols = [colnames...,:Probability] # Adds :Probability to column names
     
-    DicePools.DiceProbabilities(c,2,r,Dict([j => i for (i,j) in enumerate(c)]))
+    DicePools.DiceProbabilities(c,2,r,Dict([j => i for (i,j) in enumerate(cols)]))
 end

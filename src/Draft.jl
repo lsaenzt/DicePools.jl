@@ -75,11 +75,11 @@ function recursivedistribution(n,s)
     else
         d₋₁ = recursivedistribution(n-1,s)
 
-        dd = repeat(d₋₁,inner = (s,1))
-        ss = repeat(dice,outer = (size(d₋₁,1),1))
+        dˢ = repeat(d₋₁,inner = (s,1))
+        sᵈ = repeat(dice,outer = (size(d₋₁,1),1))
 
-        results = dd[:,1].+ss[:,1]
-        freq = dd[:,2].* ss[:,2]
+        results = dˢ[:,1].+sᵈ[:,1]
+        freq = dˢ[:,2].* sᵈ[:,2]
 
         ur = unique(results)
         p = [sum([(c == x)*f for (c,f) in zip(results,freq)]) for x in ur] 
@@ -107,7 +107,7 @@ function outcomes(n, sides,drophighest=0, droplowest=0)
 
             sum_maxdice = maxdicenotdropped*sides
             mult = binomial(n,dicewithmax) # Combinaciones de obtener x dados con resultado máximo en n
-            (d1 != nothing) && for (key, value) in d1
+            (d1 !== nothing) && for (key, value) in d1
                 d[sum_maxdice+key] = get(d,sum_maxdice+key,0) + mult*value
             end
         end
