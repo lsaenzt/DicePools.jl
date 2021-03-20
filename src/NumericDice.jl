@@ -1,8 +1,4 @@
 # TODO: Crear macro para @roll 3d6 
-# Iterator.product es una alternativa para crear todas las combinaciones
-
-using Memoize
-@memoize multinomialₘₑₘ(k::Vector{Int}) =  multinomial(k...) # No funciona porque cada resultado de multiexponent es diferente
 
 # A partir de cierto número hacer overflow ¿BigInt?
 "Fast method for standard numeric rolls. E.g. 3d6" #TODO: add modifier to name -> d6+1
@@ -53,7 +49,7 @@ function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::Stri
      r = OrderedDict{Int, Number}()
  
         for cᵢ in c
-            reord = multinomial(cᵢ) # Variaciones: todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
+            reord = multinomial(cᵢ...) # Variaciones: todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
             prob = reord/allcomb*100            
             s = sum(cᵢ.*dice.results) + mod
             r[s] = get(r,s,0) + prob         
@@ -72,14 +68,14 @@ function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::Stri
  end
 
 """
-This method allows to apply a function to each result
+This method allows to apply a function to each result before summing the results
 
 e.g. drop lowest
  roll(3,d6) do r
-    sum(r[2:end])
+    r[2:end]
  end
 """
-# RAPIDLY COLLAPSES...
+# On par with AnyDice but more flexible
 function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
    
     A = Array{Int64,2}(undef,0,3) 
@@ -101,7 +97,6 @@ function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=
      rₛ = sort(r)
  # 2. Concatenate results
     A = vcat(A,hcat(fill(n,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
-
     end
  # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame 
      n = [Symbol(name),:Result,:Probability] 

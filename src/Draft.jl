@@ -1,13 +1,17 @@
-# IDEA 1: repetir todas las combinaciones de resultados. Sencillo pero acaba siendo lento, con 5d100 se queda sin memoria y no tengo resultados individuales...
+# IDEA 1: not working because each result of multiexponent is different and therefore the arguments of multinomialₘₑₘ
+
+using Memoize
+@memoize multinomialₘₑₘ(k::Vector{Int}) =  multinomial(k...) # No funciona porque cada resultado de multiexponent es diferente...
+
+# IDEA 2: repetir todas las combinaciones de resultados. Sencillo pero acaba siendo lento, con 5d100 se queda sin memoria y no tengo resultados individuales...
 function roll(n,s)
 
     l = length(s)
     results = repeat(s,inner=l).+ repeat(s,outer=l)
-
         for i in 3:n
             results = repeat(results,inner=l).+ repeat(s,outer=length(results))
         end
-    # Usar Dict mejor?
+
     ur = unique(results)
     freq = Int[sum([c == x for c in results]) for x in ur]
 
@@ -15,14 +19,14 @@ function roll(n,s)
     
 end
 
-# IDEA 2: Este bucle obtiene las combinaciones con repeticion correctamente para 3d6. No sé cómo hacer anidados de profundidad = nº de dados
+# IDEA 3: Este bucle obtiene las combinaciones con repeticion correctamente para 3d6. No sé cómo hacer anidados de profundidad = nº de dados
 count=1
 for i in 1:6, j in i:6, k in j:6
      println(i,j,k," ",count)
      count +=1  
 end
 
-# IDEA 3: recursive "loop" para resolver el problema de Idea 2. Complejo y no sé si más rápido.
+# IDEA 4: recursive "loop" para resolver el problema de Idea 2. Complejo y no sé si más rápido.
 d=Dict{Int,Int}()
 a=zeros(Int,12)
 
@@ -45,7 +49,7 @@ function lanza(n,s)
     recursivedie(n,s)
 end
 
-# IDEA 4: el producto de todas las combinaciones. Simple pero muy lento.
+# IDEA 5: El producto de todas las combinaciones. Simple pero muy lento.
 
 function roll(n,s)
 
@@ -60,8 +64,33 @@ function roll(n,s)
     r
  end
 
-# CHECK for drop lowest-highest:https://stackoverflow.com/questions/50690348/calculate-probability-of-a-fair-dice-roll-in-non-exponential-time
-# Complejísimo y muy lento...
+ # IDEA 6: Idea 2 pero con una función llamada recursivamente. WIP
+
+function recursivedistribution(n,s)
+
+    dice = [1:s fill(1/s,s)]
+
+    if n==1
+        r = dice # Cambiar 1:s por Dice.results y fill(1/Dice.sides,Dice.sides) por
+    else
+        d₋₁ = recursivedistribution(n-1,s)
+
+        dd = repeat(d₋₁,inner = (s,1))
+        ss = repeat(dice,outer = (size(d₋₁,1),1))
+
+        results = dd[:,1].+ss[:,1]
+        freq = dd[:,2].* ss[:,2]
+
+        ur = unique(results)
+        p = [sum([(c == x)*f for (c,f) in zip(results,freq)]) for x in ur] 
+        
+        r = [ur p] # TODO: sumar modificador a ur
+    end
+    return r
+end
+
+# Solution shown in https://stackoverflow.com/questions/50690348/calculate-probability-of-a-fair-dice-roll-in-non-exponential-time
+# Complex and slow. See attached csmax.xlsx for simulation of what the function is doing
 
 function outcomes(n, sides,drophighest=0, droplowest=0)
     d=Dict()
