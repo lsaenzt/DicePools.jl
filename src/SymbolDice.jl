@@ -23,7 +23,7 @@ La función replica la filosofía del excel DicePools.xlsx
 
 function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 
-   A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2)
+   A = Array{Int64,2}(undef,0,length(dice.symbols)+2)
 
    for n in N
    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
@@ -47,12 +47,12 @@ function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 
 # 2. Transforms dice sides into categorical results. E.g.: 1 side type 1 means 1 success and 1 advantage
 
-    a = zeros(Int, size(r,1),length(dice.resulttypes))
+    a = zeros(Int, size(r,1),length(dice.symbols))
 
-    #n = Array{String}(undef,lengthdice.resulttypes)+1) # Nombres de cada columna de la matriz resultante. Tiene que ser un vector de columnas para DataFrames
+    #n = Array{String}(undef,lengthdice.symbols)+1) # Nombres de cada columna de la matriz resultante. Tiene que ser un vector de columnas para DataFrames
 
         for k in 1:size(a,1)
-                a[k,:]=sum(r[k].*dice.resultsinside)
+                a[k,:]=sum(r[k].*dice.symbolsinside)
         end
 
     A = vcat(A,hcat(fill(n,size(a,1)),a,r[:,2])) #Accumulates all results into one matrix. Number od dice, results and probability
@@ -60,7 +60,7 @@ function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
 
     #TODO:Read name directly from SymbolDice input. Impossible?
-    cols = [Symbol(name), dice.resulttypes...,:Probability]
+    cols = [Symbol(name), dice.symbols...,:Probability]
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 end
  

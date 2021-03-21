@@ -26,8 +26,8 @@ StandardDice(s::Int) = StandardDice(s,1:s)
 struct SymbolDice <: Dice 
     sides::Int #e.g. 12
     sidesfreq::Vector{Int} #[1,2,2,1,3,2,1]
-    resulttypes::Vector{Symbol} #[:blank, :success, :advantage, :triumph]
-    resultsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
+    symbols::Vector{Symbol} #[:blank, :success, :advantage, :triumph]
+    symbolsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
 end
 
 function SymbolDice(sides::Array,freq::Array=[]) #User friendly Constructor for Symbol dice
