@@ -4,13 +4,21 @@ using DataFrames, Statistics
 
 # Standard die
     
-std = roll(10,d100)
+    std = roll(10,d100);
 @test sum(std.Probability)-100 <=0.001
 
 # Custom die
     
-    custom = roll(10,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5]))
+    custom = roll(10,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5]));
 @test sum(custom.Probability)-100 <=0.001
+
+# Custom operation
+    
+    customf = roll(5,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5])) do r
+                sum(abs.(r))+2
+            end
+@test sum(customf.Probability)-100 <=0.001
+
 
 # Conan Damage Dice
 

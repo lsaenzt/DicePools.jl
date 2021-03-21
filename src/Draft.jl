@@ -26,11 +26,11 @@ for i in 1:6, j in i:6, k in j:6
      count +=1  
 end
 
-# IDEA 4: recursive "loop" para resolver el problema de Idea 2. Complejo y no sé si más rápido.
+# IDEA 4: recursive "loop" para resolver el problema de Idea 3. Complejo y no sé si más rápido.
 d=Dict{Int,Int}()
 a=zeros(Int,12)
 
-function recursivedie(n,s,k=1) #Esta lo hace
+function recursivedie(n,s,k=1)
     for i in k:s
         a[n] = i
         (n>1) && recursivedie(n-1,s,i)
@@ -64,7 +64,7 @@ function roll(n,s)
     r
  end
 
- # IDEA 6: Idea 2 pero con una función llamada recursivamente. WIP
+ # IDEA 6: Idea 2 pero con una función llamada recursivamente. El mejor con diferencia
 
 function recursivedistribution(n,s)
 

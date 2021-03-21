@@ -55,10 +55,10 @@ function recursiveroll(n,dice::NumericDice)
         sᵈ = repeat(basedie,outer = (size(d₋₁,1),1))
 
         results = dˢ[:,1].+sᵈ[:,1]
-        freq = dˢ[:,2].* sᵈ[:,2]
+        freq = dˢ[:,2].*sᵈ[:,2]
 
         ur = unique(results)
-        p = [sum([(c == x)*f for (c,f) in zip(results,freq)]) for x in ur] 
+        p = [sum([(c == x)*f for (c,f) in zip(results,freq)]) for x in ur]
         
         r = [ur p] # TODO: sumar modificador a ur
     end
@@ -67,15 +67,15 @@ end
 
 
 """
-This method allows to apply a function to each result before summing the results
+Apples a function to each result. Slow when the number of possible results is high.
 
 e.g. drop lowest
  roll(3,d6) do r
-    r[2:end]
+    sum(r[2:end])
  end
 """
 # On par with AnyDice but more flexible
-function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
+function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice")
    
     A = Array{Int64,2}(undef,0,3) 
  
@@ -89,7 +89,7 @@ function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=
         for (cᵢ,mᵢ) in zip(c,m)          
             reord = multinomial(mᵢ...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
             prob = reord/allcomb*100
-            s= sum(f(cᵢ)) + mod
+            s = f(cᵢ)
             r[s] = get(r,s,0) + prob            
         end
 
@@ -101,8 +101,65 @@ function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=
     cols = [Symbol(name),:Result,:Probability] 
     #TODO:Read name directly from CategoricalDice input. Impossible?     
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
+end
 
- end
+"""
+Drop lowest or highest results
+"""
+function roll(n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice";droplowest::Int=0,drophighest::Int=0)
+    
+    (droplowest+drophighest)>n && return error("More dice dropped than the number of dice rolled")
+
+    roll(n,dice) do r
+        sum(r[begin+droplowest:end-drophighest])
+    end
+end
+
+"""
+Take mid results
+"""
+function roll(n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice";mid::Int=1)
+    
+    mid>n && return error("Mid cannot be higher than the number of dice")
+
+    l = n - mid
+    drop = div(l,2)
+    
+    roll(n,dice) do r
+        sum(r[begin+drop:end-drop-isodd(l)])
+    end
+end
+
+"""
+Single random result of die roll
+"""
+function singleroll(n::Int,d::NumericDice,mod::Int=0)
+    s=0
+    for i in 1:n
+        s = s+ rand(d.results)
+    end
+    return s+mod
+end
+
+"""
+Sample of 'rep' rolls of an 'n' dice of type 'd'
+"""
+# TODO: Hay que hacer una simulación para operaciones extrañas de resultados 
+function sampleroll(n::Int,d::NumericDice, rep::Int)
+    results = Vector{Int}(undef,rep)
+    for i in 1:rep
+        s = 0
+        for i in 1:n
+            s = s+ rand(d.results)
+        end
+        results[i] = s
+    end
+    ur = sort(unique(results))
+    freq = [sum([c == x for c in results]) for x in ur] 
+    freq = freq./length(results).*100
+
+    return [ur freq]
+end
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------

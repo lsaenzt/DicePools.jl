@@ -69,13 +69,13 @@ function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 end
  
 """
-    combineresults(r1,r2,rs...)
+    combine(r1,r2,rs...)
 
 Combines the results into one table 
 
-    combineresults(r,t,s)
+    combine(r,t,s)
 """
-function combineresults(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities...)
+function combine(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities...)
     
     rs = (r1,r2,ri...)
     l = size.(data.(rs),1) # Length of each Table
