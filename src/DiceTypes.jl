@@ -30,24 +30,26 @@ struct SymbolDice <: Dice
     resultsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
 end
 
-function SymbolDice(sides::Array,freq::Array=[]) #User friendly Constructor for categorial dice
+function SymbolDice(sides::Array,freq::Array=[]) #User friendly Constructor for Symbol dice
     
-    #TODO: identificar caras repetidas y unirlas
-    (freq==[]) && (freq = ones(length(r))) #If f is empty then each results happens once in the dice
-    (sum(freq) < length(sides)) && error("Más resultados en el dado que caras") #El vector rep contiene cuantas veces se repita cada resultado y debe ser igual a las caras
-     
-    r = [] # Unique results categories
+    (freq==[]) && (freq = ones(length(sides))) #If f is empty then each results happens once in the die
+    (sum(freq) < length(sides)) && error("More results than sides in the die") #El vector rep contiene cuantas veces se repita cada resultado y debe ser igual a las caras
+   
+    # Unify repeated sides
+    ur = unique(sides)
+    p = [sum([(c == x)*f for (c,f) in zip(sides,freq)]) for x in ur]
 
-    for sᵢ in sides # Extracts the results categories
+
+    r = [] # store unique symbols in die
+    for sᵢ in ur # Extracts the symbols in die
         for j in sᵢ
             push!(r,j)
         end
     end
-    unique!(r) # Unique category of results as Symbol
+    unique!(r) # Unique die symbols
     
     m = [] # count the results of each side
-
-    for sᵢ in sides # Counts the results present in each side as 1 and 0
+    for sᵢ in ur # Counts the results present in each side as 1 and 0
         temp = fill(0,length(r))
             for j in sᵢ
                 temp += (j .== r) 
@@ -56,7 +58,7 @@ function SymbolDice(sides::Array,freq::Array=[]) #User friendly Constructor for 
     end
 
     r = Symbol.(r)
-    SymbolDice(sum(freq),freq,r,m) 
+    SymbolDice(sum(p),p,r,m) 
 end
 
 

@@ -8,6 +8,7 @@ export roll, combine, reroll, sampleroll
 
 include("DiceTypes.jl")
 include("TablesInterface.jl")
+include("Macros.jl")
 include("SymbolDice.jl")
 include("NumericDice.jl")
 include("DiceExamples.jl")

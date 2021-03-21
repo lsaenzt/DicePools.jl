@@ -1,8 +1,7 @@
 # TODO: Crear macro para @roll 3d6 
 
-# A partir de cierto número hacer overflow ¿BigInt? ¿Cambiar a roll(n,s::NumericDice)?
-"Fast method for standard numeric rolls. E.g. 3d6" # TODO: add modifier to name -> d6+1
-function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0,name::String=string("d",dice.sides))
+"Fast method for standard numeric rolls. E.g. 3d6+2" 
+function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0)
 
     A = Array{Int64,2}(undef,0,3) 
     s = dice.sides
@@ -25,9 +24,10 @@ function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0,name::Str
     A = vcat(A,hcat(fill(nᵢ,nᵢ*s-nᵢ+1),r))
     end
     
-    # Creates a DiceProbabilities struct that is Tables.jl compliant 
-     cols = [Symbol(name),:Result,:Probability]   
-     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Tables.jl compliant
+    # Creates a DiceProbabilities struct that is Tables.jl compliant
+    name = (mod==0) ? string(n,"d",dice.sides) : string(n,"d",dice.sides,"+",mod)
+    cols = [Symbol(name),:Result,:Probability]   
+    DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Tables.jl compliant
 end
 
 """
@@ -142,21 +142,20 @@ function singleroll(n::Int,d::NumericDice,mod::Int=0)
 end
 
 """
-Sample of 'rep' rolls of an 'n' dice of type 'd'
+Sample of 'rep' rolls of an 'n' dice of type 'd' applying 'f' to each result
 """
-# TODO: Hay que hacer una simulación para operaciones extrañas de resultados 
-function sampleroll(n::Int,d::NumericDice, rep::Int)
-    results = Vector{Int}(undef,rep)
+function sampleroll(f::Function, n::Int,d::NumericDice, rep::Int)
+    res = Vector{Int}(undef,rep)
     for i in 1:rep
-        s = 0
-        for i in 1:n
-            s = s+ rand(d.results)
+        r = Vector{Int}(undef,d.sides)
+        for j in 1:n
+            r[j] = rand(d.results)
         end
-        results[i] = s
+        res[i] = f(r)
     end
-    ur = sort(unique(results))
-    freq = [sum([c == x for c in results]) for x in ur] 
-    freq = freq./length(results).*100
+    ur = sort(unique(res))
+    freq = [sum([c == x for c in res]) for x in ur] 
+    freq = freq./length(res).*100
 
     return [ur freq]
 end

@@ -23,7 +23,7 @@ La función replica la filosofía del excel DicePools.xlsx
 
 function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 
-   A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2) 
+   A = Array{Int64,2}(undef,0,length(dice.resulttypes)+2)
 
    for n in N
    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
@@ -34,16 +34,16 @@ function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 
     r= Array{Any}(undef,length(c), 2)
 
-    for (j,sidecombs) in enumerate(c)
+        for (j,sidecombs) in enumerate(c)
 
-        reord = multinomial(sidecombs...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados blancos y 3 dados éxitos 
-        events = reord*(.*(dice.sidesfreq.^sidecombs...)) # Todas las posibilidades teniendo en cuenta cuando hay caras iguales. Ej: hay 4 caras con resultados blanco en cada dado
-        prob = events/allcomb*100
-      
-        r[j,1] = sidecombs
-        r[j,2] = prob
-        # r is a matrix with each of the possible combination of dice sides and its probability
-    end
+            reord = multinomial(sidecombs...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados blancos y 3 dados éxitos 
+            events = reord*(.*(dice.sidesfreq.^sidecombs...)) # Todas las posibilidades teniendo en cuenta cuando hay caras iguales. Ej: hay 4 caras con resultados blanco en cada dado
+            prob = events/allcomb*100
+        
+            r[j,1] = sidecombs
+            r[j,2] = prob
+            # r is a matrix with each of the possible combination of dice sides and its probability
+        end
 
 # 2. Transforms dice sides into categorical results. E.g.: 1 side type 1 means 1 success and 1 advantage
 
@@ -51,21 +51,17 @@ function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 
     #n = Array{String}(undef,lengthdice.resulttypes)+1) # Nombres de cada columna de la matriz resultante. Tiene que ser un vector de columnas para DataFrames
 
-    for k in 1:size(a,1)
-            a[k,:]=sum(r[k].*dice.resultsinside)
-    end
+        for k in 1:size(a,1)
+                a[k,:]=sum(r[k].*dice.resultsinside)
+        end
 
     A = vcat(A,hcat(fill(n,size(a,1)),a,r[:,2])) #Accumulates all results into one matrix. Number od dice, results and probability
-
     end
 # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
 
+    #TODO:Read name directly from SymbolDice input. Impossible?
     cols = [Symbol(name), dice.resulttypes...,:Probability]
-
-    #TODO:Read name directly from CategoricalDice input. Impossible?
-    
-    DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
-
+    DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 end
  
 """
