@@ -1,12 +1,13 @@
 """
-    roll(iter,dice)
+    roll(n,dice,[name])
 
-#Arguments
+# Arguments
     - iter::Union{Int,OrdinalRange} -> number of dice o a range of values (E.g. 1:10)
-    - dice::CategoricalDice -> an already defined dice 
-    - name::String="Dice" -> name of the dice to be used as output 
+    - dice::SymbolDice -> an already defined die 
+    - name::String="Dice" -> name of the die to be used in output 
 
-# Returns a Namedtuple with column names and values: 
+# Returns 
+A Namedtuple with column names and values: 
     1.- Name of the die => number of dice
     2.- One column for each types of results => total number of results
     3.- Probability => probability of the combination of results
@@ -20,17 +21,16 @@ La función replica la filosofía del excel DicePools.xlsx
     4.- El total de casos posibles son los casos para cada combinación de resultados * las posibles ordenaciones según dados
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
-
-function roll(N::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
+function roll(n::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 
    A = Array{Int64,2}(undef,0,length(dice.symbols)+2)
 
-   for n in N
+   for nᵢ in n
    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
 
-    c = multiexponents(length(dice.sidesfreq),n)  # multiexponents return an iterable
+    c = multiexponents(length(dice.sidesfreq),nᵢ)  # multiexponents return an iterable
     
-    allcomb = dice.sides^n # Todas las posibles combinaciones de caras que pueden salir
+    allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir
 
     r= Array{Any}(undef,length(c), 2)
 
@@ -117,7 +117,6 @@ function combine(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabiliti
     cols = [colname...,:Probability]
     
     DicePools.DiceProbabilities(c,n,r,Dict([j => i for (i,j) in enumerate(cols)]))
-
 end
 
 """

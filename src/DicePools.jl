@@ -20,7 +20,7 @@ using .DicePools
 
 #= ToDo List 
     macro @roll 3d6+1
-    combine numeric d5+d20
+    combine numeric dice d5+d20
     reroll numeric 
     exploding dice
     docs

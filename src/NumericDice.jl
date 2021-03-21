@@ -1,6 +1,9 @@
 # TODO: Crear macro para @roll 3d6 
 
-"Fast method for standard numeric rolls. E.g. 3d6+2" 
+"""
+    roll(n,dice,mod)
+Fast method for standard numeric rolls. E.g. 3d6+2
+""" 
 function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0)
 
     A = Array{Int64,2}(undef,0,3) 
@@ -31,8 +34,10 @@ function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0)
 end
 
 """
-This method is for non-standard numeric dice. E.g: Fugde dice
-Calculation is done recursively
+     roll(n,dice,mod,[name])
+
+This method is for non-standard numeric dice. E.g: Fugde dice. Calculation is done recursively
+mod::Int is a modifier to apply to each result
 """
 function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
     
@@ -65,17 +70,18 @@ function recursiveroll(n,dice::NumericDice)
     return r
 end
 
-
 """
-Apples a function to each result. Slow when the number of possible results is high.
+    roll(n,dice,[name]) do r
+        f(r)
+    end
+Applies a function to each result. Slow when the number of possible results is high.
 
-e.g. drop lowest
- roll(3,d6) do r
-    sum(r[2:end])
- end
+# Example. Drop lowest
+    roll(3,d6) do r
+        sum(r[2:end])
+    end
 """
-# On par with AnyDice but more flexible
-function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice")
+function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice") # On par with AnyDice but more flexible
    
     A = Array{Int64,2}(undef,0,3) 
  
@@ -98,14 +104,17 @@ function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice,name::Str
     A = vcat(A,hcat(fill(n,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
     end
  # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame 
-    cols = [Symbol(name),:Result,:Probability] 
-    #TODO:Read name directly from CategoricalDice input. Impossible?     
+    cols = [Symbol(name),:Result,:Probability]    
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 end
 
 """
-Drop lowest or highest results
-"""
+    roll(n,dice,[name];kwarg)
+
+Methods for:
+    1.- Drop lowest or highest results with kwarg 'droplowest::Int' and/or 'drophighest::Int'
+    2.- Choose mid results with kwarg 'mid::Int'
+""" 
 function roll(n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice";droplowest::Int=0,drophighest::Int=0)
     
     (droplowest+drophighest)>n && return error("More dice dropped than the number of dice rolled")
@@ -115,9 +124,6 @@ function roll(n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice";d
     end
 end
 
-"""
-Take mid results
-"""
 function roll(n::Union{Int,OrdinalRange},dice::NumericDice,name::String="Dice";mid::Int=1)
     
     mid>n && return error("Mid cannot be higher than the number of dice")
