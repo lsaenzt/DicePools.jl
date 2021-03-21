@@ -2,6 +2,16 @@ using Test, .DicePools
 
 using DataFrames, Statistics
 
+# Standard die
+    
+std = roll(10,d100)
+@test sum(std.Probability)-100 <=0.001
+
+# Custom die
+    
+    custom = roll(10,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5]))
+@test sum(custom.Probability)-100 <=0.001
+
 # Conan Damage Dice
 
     Conan_Dmg = DicePools.CategoricalDice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2,2]);
@@ -39,10 +49,9 @@ using DataFrames, Statistics
 @test maximum(round.(cumchance.MoreThan,digits=2))<=100
 
 
-#= Nota explicativa de ((s,p) -> sum(p.*[s.<=i for i in s]))
-
-1.- Pasamos el vector S "success" y el p "probability" 
-2.- Generamos un matriz que tiene para cada fila un vector que indica si S es mayor que el valor individual de fila i
-3.- Multiplicamos cada elemento de P por cada Array anterior 
-4.- Sumamos el vector resultanto de lo anterior
+#= Explanatory note of ((s,p) -> sum(p.*[s.<=i for i in s]))
+    1.- Pasamos el vector S "success" y el p "probability" 
+    2.- Generamos un matriz que tiene para cada fila un vector que indica si S es mayor que el valor individual de fila i
+    3.- Multiplicamos cada elemento de P por cada Array anterior 
+    4.- Sumamos el vector resultanto de lo anterior
 =#
