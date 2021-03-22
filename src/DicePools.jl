@@ -6,6 +6,8 @@ using Tables
 
 export roll, combine, reroll, sampleroll
 
+setprecision(16)
+
 include("DiceTypes.jl")
 include("TablesInterface.jl")
 include("Macros.jl")
@@ -23,6 +25,6 @@ using .DicePools
     combine numeric dice d5+d20
     reroll numeric 
     exploding dice
+    simplify docstrings for roll
     docs
 =#
-

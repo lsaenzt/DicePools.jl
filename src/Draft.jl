@@ -116,4 +116,8 @@ function outcomes(n, sides,drophighest=0, droplowest=0)
 end
 
     
-    
+# Test dispatch
+
+dummy(n::Int, a::Int, mod::Int=0)=n*a+mod
+
+dummy(n::Int, a::Real;s=1)=n*a^s

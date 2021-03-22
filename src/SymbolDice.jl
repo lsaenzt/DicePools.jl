@@ -1,5 +1,5 @@
 """
-    roll(n,dice,[name])
+    roll(n,dice)
 
 # Arguments
     - iter::Union{Int,OrdinalRange} -> number of dice o a range of values (E.g. 1:10)
@@ -21,7 +21,7 @@ La función replica la filosofía del excel DicePools.xlsx
     4.- El total de casos posibles son los casos para cada combinación de resultados * las posibles ordenaciones según dados
     5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
-function roll(n::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
+function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
 
    A = Array{Int64,2}(undef,0,length(dice.symbols)+2)
 
@@ -60,7 +60,7 @@ function roll(n::Union{Int,OrdinalRange},dice::SymbolDice,name::String="Dice")
 # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
 
     #TODO:Read name directly from SymbolDice input. Impossible?
-    cols = [Symbol(name), dice.symbols...,:Probability]
+    cols = [Symbol(dice.name), dice.symbols...,:Probability]
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 end
  
