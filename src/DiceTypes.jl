@@ -34,7 +34,8 @@ struct SymbolDice <: Dice
     symbolsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
 end
 
-function SymbolDice(sides::Array,freq::Array=[],name::String="Dice") #User friendly Constructor for Symbol dice
+"User friendly Constructor for Symbol dice"
+function SymbolDice(sides::Array,freq::Array=[],name::String="Dice") 
     
     (freq==[]) && (freq = ones(length(sides))) #If f is empty then each results happens once in the die
     (sum(freq) < length(sides)) && error("More results than sides in the die") #El vector rep contiene cuantas veces se repita cada resultado y debe ser igual a las caras
@@ -66,7 +67,14 @@ end
 
 
 "TODO hybrid dice"
-struct HybridDice end
+struct HybridDice <:Dice
+    name::String
+    sides::Int #e.g. 12
+    results::Vector{Int} #e.g. [1:10]
+    symbolsidefreq::Vector{Int} #[1,1]
+    symbols::Vector{Symbol} #[:sauroneye, :hope]
+    symbolsinside::Vector{Vector{Int}} #[[1,0], [0,1]]
+end
 
 
 "Tables.jl compliant Struct for storing dice probabilities results"

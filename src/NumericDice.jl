@@ -42,7 +42,6 @@ mod::Int is a modifier to apply to each result
 function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;name::String=dice.name)
     #TODO: for i in n para varias tiradas.
     A = Array{Real,2}(undef,0,3) 
-
     for nᵢ in n
         r = recursiveroll(nᵢ,dice)
         (mod != 0) && (r[:,1] = r[:,1].+mod)
@@ -55,7 +54,6 @@ function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;name::Stri
 end
 
 function recursiveroll(n,dice::NumericDice)
-
     basedie = Real[dice.results fill(100/dice.sides,dice.sides)]
     if n==1
         r = basedie
@@ -88,24 +86,20 @@ Applies a function to each result. Slow when the number of possible results is h
         sum(r[2:end])
     end
 """
-function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") # On par with AnyDice but more flexible
-   
-    A = Array{Real,2}(undef,0,3) 
- 
+function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") # On par with AnyDice but more flexible   
+    A = Array{Real,2}(undef,0,3)  
     for nᵢ in n
     # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
     c = with_replacement_combinations(dice.results,nᵢ)
     m = multiexponents(dice.sides,nᵢ)
     allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
-    r = OrderedDict{Int, Real}()
- 
+    r = OrderedDict{Int, Real}() 
         for (cᵢ,mᵢ) in zip(c,m)          
             reord = multinomial(mᵢ...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
             prob = reord/allcomb*100
             s = f(cᵢ)
             r[s] = get(r,s,0) + prob            
         end
-
     rₛ = sort(r)
  # 2. Concatenate results
     A = vcat(A,hcat(fill(nᵢ,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
@@ -121,10 +115,8 @@ end
 
 Method for dropping lowest or highest results with kwarg 'droplowest::Int' and/or 'drophighest::Int'
 """ 
-function rollanddrop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice")
-    
+function rollanddrop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice")    
     (droplowest+drophighest)>n && return error("More dice dropped than the number of dice rolled")
-
     roll(n,dice) do r
         sum(r[begin+droplowest:end-drophighest]) + mod
     end

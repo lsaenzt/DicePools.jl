@@ -1,5 +1,3 @@
-export d4,d6,d8,d10,d12,d20,d100,fudge,MY0_Skill,MY0_Eq,MY0_Attr,Conan_Dmg,Boost,Setback,Ability
-
 # NumericDice
 d4 = StandardDice(4)
 d6 = StandardDice(6)
@@ -20,5 +18,5 @@ Conan_Dmg = SymbolDice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2
 
 # Genesys
 Boost = SymbolDice([["Blank"],["Success"],["Success","Advantage"],["Advantage","Advantage"],["Advantage"]],[2,1,1,1,1],"Boost") 
-Setback = SymbolDice([["Blank"],["Failure"],["Threat"]],[2,2,2],"Setback")                                                      
+Setback = SymbolDice([["Blank"],["Failure"],["Threat"]],[2,2,2],"Setback") #[1,1,1] works the same                                                   
 Ability = SymbolDice([["Blank"],["Success"],["Success","Success"],["Advantage"],["Success","Advantage"],["Advantage","Advantage"]],[1,2,1,2,1,1],"Ability")
