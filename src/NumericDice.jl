@@ -1,4 +1,4 @@
-# Note: Use Real for getting Int for the number of dice and results
+# Note: Use Real for getting Int for the number of dice and results and float for probabilities
 """
     roll(n,dice,mod,[name])
 Fast method for standard numeric rolls. E.g. 3d6+2
@@ -39,26 +39,29 @@ end
 This method is for non-standard numeric dice. E.g: Fugde dice. Calculation is done recursively
 mod::Int is a modifier to apply to each result
 """
-function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;name::String=dice.name)
+function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::String=dice.name)
     #TODO: for i in n para varias tiradas.
     A = Array{Real,2}(undef,0,3) 
+
     for nᵢ in n
-        r = recursiveroll(nᵢ,dice)
+        r = recursiveroll_sum(nᵢ,dice)
         (mod != 0) && (r[:,1] = r[:,1].+mod)
 
     A = vcat(A,hcat(fill(nᵢ,size(r,1)),r))
     end
+
     name = (mod==0) ? name : string(n,name,"+",mod)
     cols = [Symbol(name),:Result,:Probability]   
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)]))
 end
 
-function recursiveroll(n,dice::NumericDice)
+function recursiveroll_sum(n,dice::NumericDice)
+
     basedie = Real[dice.results fill(100/dice.sides,dice.sides)]
     if n==1
         r = basedie
     else
-        d₋₁ = recursiveroll(n-1,dice)
+        d₋₁ = recursiveroll_sum(n-1,dice)
 
         dˢ = repeat(d₋₁,inner = (dice.sides,1))
         sᵈ = repeat(basedie,outer = (size(d₋₁,1),1))
@@ -86,37 +89,59 @@ Applies a function to each result. Slow when the number of possible results is h
         sum(r[2:end])
     end
 """
-function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") # On par with AnyDice but more flexible   
+
+function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice")   
+
     A = Array{Real,2}(undef,0,3)  
+
     for nᵢ in n
     # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
     c = with_replacement_combinations(dice.results,nᵢ)
-    m = multiexponents(dice.sides,nᵢ)
     allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
     r = OrderedDict{Int, Real}() 
-        for (cᵢ,mᵢ) in zip(c,m)          
-            reord = multinomial(mᵢ...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
+        for cᵢ in c
+            rep = count_repeated(cᵢ)          
+            reord = multinomial(rep...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados con 4 y 3 dados con 2 
             prob = reord/allcomb*100
             s = f(cᵢ)
-            r[s] = get(r,s,0) + prob            
+            r[s] = get(r,s,0) + prob
         end
-    rₛ = sort(r)
- # 2. Concatenate results
-    A = vcat(A,hcat(fill(nᵢ,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
+    sort!(r)
+    # 2. Concatenate results
+    A = vcat(A,hcat(fill(nᵢ,length(r)),collect(keys(r)),collect(values(r))))
     end
- # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
+
+    # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
     cols = [Symbol(name),:Result,:Probability]
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 end
 
-# Nota: No se pueden llamar "roll". El multiple dispatch toma sólo argumentos posiciones y se confunde entre estas dos y la de antes
+"Count repeated values in an ordered array" # Sustituye el uso de multiexponents(dice.sides,nᵢ) que es más lento.
+function count_repeated(a::Array)
+    i = 1
+    d = 1
+    for j in 2:length(a) # El primer bloque de repetidos en unidades, el segundo en decenas, el tercero en centenas...
+       if a[j]==a[j-1] 
+         i += d
+       else
+         d *= 10
+         i += d
+        end
+    end
+    digits(i) # Descomposición de número
+end
+
+
+# Nota: Las funciones siguientes no se pueden llamar "roll". El multiple dispatch toma sólo argumentos posiciones y se confunde entre estas dos y la de antes
 """
     rollanddrop(n,dice,mod;[droplowest=0],[drophighest=0],[name])
 
 Method for dropping lowest or highest results with kwarg 'droplowest::Int' and/or 'drophighest::Int'
 """ 
-function rollanddrop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice")    
+function rollanddrop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice") 
+
     (droplowest+drophighest)>n && return error("More dice dropped than the number of dice rolled")
+
     roll(n,dice) do r
         sum(r[begin+droplowest:end-drophighest]) + mod
     end
@@ -139,9 +164,11 @@ function takemid(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;mid=1,n
     end
 end
 
-function explode end
+function explode() end
 
-function beattarget end
+function rolltobeat() end
+
+function recursiveroll_beat(n,dice::NumericDice;target::Int) end # ¿Versión por encima de y por debajo de?
 
 """
 Single random result of die roll

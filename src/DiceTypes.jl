@@ -35,34 +35,36 @@ struct SymbolDice <: Dice
 end
 
 "User friendly Constructor for Symbol dice"
-function SymbolDice(sides::Array,freq::Array=[],name::String="Dice") 
-    
+function SymbolDice(sides::Array,freq::Array=[],name::String="Dice")
+
     (freq==[]) && (freq = ones(length(sides))) #If f is empty then each results happens once in the die
     (sum(freq) < length(sides)) && error("More results than sides in the die") #El vector rep contiene cuantas veces se repita cada resultado y debe ser igual a las caras
-   
+    
     # Unify repeated sides
     ur = unique(sides)
     p = [sum([(c == x)*f for (c,f) in zip(sides,freq)]) for x in ur]
-
-    r = [] # store unique symbols in die
+    
+    # Store unique symbols in die
+    s = [] 
     for sᵢ in ur # Extracts the symbols in die
         for j in sᵢ
-            push!(r,j)
+            push!(s,j)
         end
     end
-    unique!(r) # Unique die symbols
+    unique!(s) # Unique die symbols
     
-    m = [] # count the results of each side
+    # Count the results of each side
+    m = [] 
     for sᵢ in ur # Counts the results present in each side as 1 and 0
-        temp = fill(0,length(r))
+        temp = fill(0,length(s))
             for j in sᵢ
-                temp += (j .== r) 
+                temp += (j .== s) 
             end
         push!(m,temp)
     end
 
-    r = Symbol.(r)
-    SymbolDice(name,sum(p),p,r,m) 
+    s = Symbol.(s)
+    SymbolDice(name,sum(p),p,s,m) 
 end
 
 

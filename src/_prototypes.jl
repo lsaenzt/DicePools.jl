@@ -1,3 +1,7 @@
+#-----------------------------------------------------------------------------------------------------------------------------
+# DICE RESULTS
+#-----------------------------------------------------------------------------------------------------------------------------
+
 # IDEA 1: not working because each result of multiexponent is different and therefore the arguments of multinomialₘₑₘ
 
 using Memoize
@@ -121,3 +125,31 @@ end
 dummy(n::Int, a::Int, mod::Int=0)=n*a+mod
 
 dummy(n::Int, a::Real;s=1)=n*a^s
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# COUNT DUPLICATES
+#-----------------------------------------------------------------------------------------------------------------------------
+
+# This one works but doing many, many allocations
+function count_duplicates(a::Array,r=[])
+    i = 1
+    while i<length(a) && (a[i] == a[i+1])
+        i += 1
+    end
+    i < length(a) && count_duplicates(a[i+1:end],r)
+    push!(r,i)
+end
+
+function count_duplicates(a::Array)
+    i = 1
+    d = 1
+    for j in 2:length(a)
+       if a[j]==a[j-1] 
+         i+=d
+       else
+         d *= 10
+         i += d
+        end
+    end
+    digits(i)
+end
