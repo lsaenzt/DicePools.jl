@@ -7,7 +7,7 @@ using Tables
 export roll, combine, reroll, sampleroll, rollanddrop, takemid
 export d4,d6,d8,d10,d12,d20,d100,fudge,MY0_Skill,MY0_Eq,MY0_Attr,Conan_Dmg,Boost,Setback,Ability
 
-setprecision(16)
+setprecision(32)
 
 include("DiceTypes.jl")
 include("TablesInterface.jl")
@@ -21,7 +21,7 @@ end # module
 
 using .DicePools
 
-#= ToDO List 
+#= ToDO List
     macro @roll 3d6+1
     combine numeric dice d5+d20
     reroll numeric

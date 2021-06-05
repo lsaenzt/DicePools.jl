@@ -140,6 +140,7 @@ function count_duplicates(a::Array,r=[])
     push!(r,i)
 end
 
+# This one works much faster
 function count_duplicates(a::Array)
     i = 1
     d = 1

@@ -1,10 +1,10 @@
 export SymbolDice, CustomDice, StandardDice
 
 abstract type Dice end
-"Numeric dice have results that are numbers to be summed"
+"Numeric dice have results that are numbers to be added up"
 abstract type NumericDice <:Dice end
 
-"A numeric dice with numbers "
+"A numeric dice with any combination of numbers "
 struct CustomDice <:NumericDice
     name::String
     sides::Int #e.g. 3
@@ -25,11 +25,11 @@ CustomDice(r::Vector{Int}) = CustomDice("Dice",length(r),r)
 CustomDice(r::Vector{Int},name::String) = CustomDice(name,length(r),r)
 StandardDice(s::Int) = StandardDice(string("d",s),s,1:s)
 
-"Categorical dice produce descriptive results that are combined"
+"Symbol dice produce descriptive results that are combined"
 struct SymbolDice <: Dice 
     name::String
     sides::Int #e.g. 12
-    sidesfreq::Vector{Int} #[1,2,2,1,3,2,1]
+    sidesfreq::Vector{Int} #[1,2,2,1,3,2,1] # How many times a specific side is repeated in the die. The order must match "symbolsinside"
     symbols::Vector{Symbol} #[:blank, :success, :advantage, :triumph]
     symbolsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
 end

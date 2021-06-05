@@ -67,7 +67,7 @@ function recursiveroll_sum(n,dice::NumericDice)
         sᵈ = repeat(basedie,outer = (size(d₋₁,1),1))
 
         results = dˢ[:,1].+sᵈ[:,1]
-        freq = dˢ[:,2].*sᵈ[:,2]
+        freq = dˢ[:,2].*sᵈ[:,2]/100
 
         ur = unique(results)
         p = [sum([(c == x)*f for (c,f) in zip(results,freq)]) for x in ur]

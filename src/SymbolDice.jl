@@ -57,7 +57,8 @@ function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
 
     A = vcat(A,hcat(fill(n,size(a,1)),a,r[:,2])) #Accumulates all results into one matrix. Number od dice, results and probability
     end
-# 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
+
+# 3. Creates a DiceProbabilities struct that is Tables.jl compliant -> Can be directly used with |> DataFrame
 
     #TODO:Read name directly from SymbolDice input. Impossible?
     cols = [Symbol(dice.name), dice.symbols...,:Probability]
