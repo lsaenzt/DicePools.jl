@@ -34,7 +34,7 @@ struct SymbolDice <: Dice
     symbolsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
 end
 
-"User friendly Constructor for Symbol dice"
+"User 'friendly' Constructor for Symbol dice"
 function SymbolDice(sides::Array,freq::Array=[],name::String="Dice")
 
     (freq==[]) && (freq = ones(length(sides))) #If f is empty then each results happens once in the die
@@ -77,7 +77,6 @@ struct HybridDice <:Dice
     symbols::Vector{Symbol} #[:sauroneye, :hope]
     symbolsinside::Vector{Vector{Int}} #[[1,0], [0,1]]
 end
-
 
 "Tables.jl compliant Struct for storing dice probabilities results"
 struct DiceProbabilities <: Tables.AbstractColumns

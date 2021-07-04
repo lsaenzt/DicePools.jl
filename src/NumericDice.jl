@@ -40,7 +40,7 @@ This method is for non-standard numeric dice. E.g: Fugde dice. Calculation is do
 mod::Int is a modifier to apply to each result
 """
 function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::String=dice.name)
-    #TODO: for i in n para varias tiradas.
+    
     A = Array{Real,2}(undef,0,3) 
 
     for nᵢ in n
@@ -59,7 +59,9 @@ function recursiveroll_sum(n,dice::NumericDice)
 
     basedie = Real[dice.results fill(100/dice.sides,dice.sides)]
     if n==1
-        r = basedie
+        ur = unique(basedie[:,1])
+        p = [sum([(c == x)*f for (c,f) in zip(basedie[:,1],basedie[:,2])]) for x in ur]
+        r = Real[ur p]
     else
         d₋₁ = recursiveroll_sum(n-1,dice)
 
@@ -150,7 +152,7 @@ end
 """
     takemid(n,dice,[mod=0];[mid=1],[name])
 
-Methods for hoose mid results with kwarg 'mid::Int'
+Methods for choose mid results with kwarg 'mid::Int'
 """ 
 function takemid(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;mid=1,name="Dice")
     
@@ -164,11 +166,30 @@ function takemid(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;mid=1,n
     end
 end
 
+"""
+    beattarget(n,dice;target=maximum(dice.results),equal=true, [name])
+
+Beating a target number with n dice. If equal is set to true, matching the target counts as success
+""" 
+function beattarget(n,dice::NumericDice;target::Int=maximum(dice.results),name=dice.name, equal=true) 
+    equal ? (f = ≥) : (f = >) # if equal is true use equal or greater, else use greater
+    dice = CustomDice([f(i,target) ? 1 : 0 for i in dice.results],name) # Sides that count as 1 success
+    roll(n,dice)
+end
+
+"""
+    belowtarget(n,dice;target=maximum(dice.results),equal=true, [name])
+
+Roll below a target number with n dice. If equal is set to true, matching the target counts as success
+""" 
+function belowtarget(n,dice::NumericDice;target::Int=maximum(dice.results),name=dice.name, equal=true) 
+    equal ? (f = ≤) : (f = <) # if equal is true use equal or less, else use less
+    dice = CustomDice([f(i,target) ? 1 : 0 for i in dice.results],name) # Sides that count as 1 success
+    roll(n,dice)
+end
+
+
 function explode() end
-
-function rolltobeat() end
-
-function recursiveroll_beat(n,dice::NumericDice;target::Int) end # ¿Versión por encima de y por debajo de?
 
 """
 Single random result of die roll
