@@ -1,11 +1,13 @@
 """
-    combine(r1,r2,rs...)
+    combineresults(r1,r2,rs...)
 
 Combines the results of several dice rolls into one table 
 
-    combine(r,t,s)
+TODO: Group results
+
+    combineresults(r,t,s)
 """
-function combine(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities...)
+function combineresults(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities...)
     
     rs = (r1,r2,ri...)
     l = size.(data.(rs),1) # Length of each Table
@@ -42,11 +44,19 @@ function combine(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabiliti
 
     for (i,j) in enumerate(colname)
         r[:,i] = sum(tempr[:,j.==tempnames],dims=2) #Sums columns with the same name as j
-    end    
+    end
     # Probability calculation
         r[:,end] = prod(tempr[:,:Probability.==tempnames],dims=2)./10000 #Sums columns with the same name as j
  
     cols = [colname...,:Probability]
     
     DicePools.DiceProbabilities(cols,n,r,Dict([j => i for (i,j) in enumerate(cols)]))
+end
+
+"consolidates repeated results in a combination"
+
+function consolidate(dp::DiceProbabilities)
+
+    unique(data(dp)[:,1:end-1];dims=1) # Resultados únicos
+
 end
