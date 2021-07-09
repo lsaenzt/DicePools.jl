@@ -55,16 +55,15 @@ function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
                 a[k,:]=sum(r[k].*dice.symbolsinside)
         end
 
-    A = vcat(A,hcat(fill(n,size(a,1)),a,r[:,2])) #Accumulates all results into one matrix. Number od dice, results and probability
-    end
+    A = vcat(A,hcat(fill(nᵢ,size(a,1)),a,r[:,2])) #Accumulates all results into one matrix. Number od dice, results and probability
+    
+    end #for
 
 # 3. Creates a DiceProbabilities struct that is Tables.jl compliant -> Can be directly used with |> DataFrame
-
-    #TODO:Read name directly from SymbolDice input. Impossible?
     cols = [Symbol(dice.name), dice.symbols...,:Probability]
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
+
 end
- 
 """
     reroll(iter, dice::categorical,reroll::Symbol, name::String="Dice")
 

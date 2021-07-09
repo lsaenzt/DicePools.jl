@@ -4,13 +4,14 @@ using Combinatorics
 using OrderedCollections
 using Tables
 
-export roll, combine, reroll, sampleroll, rollanddrop, takemid, beattarget, belowtarget
+export roll, reroll, sampleroll, rollanddrop, takemid, beattarget, belowtarget, pool
 export d4,d6,d8,d10,d12,d20,d100,fudge,MY0_Skill,MY0_Eq,MY0_Attr,Conan_Dmg,Boost,Setback,Ability
 
 setprecision(32)
 
 include("DiceTypes.jl")
 include("TablesInterface.jl")
+include("pool.jl")
 include("Macros.jl")
 include("SymbolDice.jl")
 include("NumericDice.jl")
@@ -29,6 +30,6 @@ using .DicePools
     hybrid dice (e.g. The one ring: d10 plus symbols)
     double target (e.g. Conand20: 1 success or 2 successes)
     change symboldice from array of arrays to array...(splat)
-    Groupby symbol dice
+    Groupby combined dice !!
     docs
 =#
