@@ -49,8 +49,6 @@ function pool(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities.
         r[:,end] = prod(tempr[:,:Probability.==tempnames],dims=2)./100 # Multiplies probabilities
  
     cols = [colname...,:Probability]
-
-    # collapse(r)
  
     DicePools.DiceProbabilities(cols, n, collapse(r), Dict([j => i for (i,j) in enumerate(cols)]))
 end
@@ -62,7 +60,7 @@ function collapse(d::Array{Real})
         output =Array{Real}(d[1:0, :])        # Empty matrix with no rows and same columns as dp. Trick from Timeseries.jl
         groups = Array{Int}(d[:,1:end-1])     # Matrix with columns to groups
         prob = Vector{Float64}(d[:,end]) # Probabilities
-        temp = Vector{Real}(undef,size(d,2))
+        temp = Vector{Real}(undef,size(d,2)) # Vector of type Real to store Int for results and Float for Probabilities
 
         for i in eachrow(groups)
             in(i,s) && continue     # If the row has been already computed skip to next iteration

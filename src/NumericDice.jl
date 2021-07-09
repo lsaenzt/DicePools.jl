@@ -1,7 +1,11 @@
 # Note: Use Real for getting Int for the number of dice and results and float for probabilities
 """
     roll(n,dice,mod,[name])
+    
 Fast method for standard numeric rolls. E.g. 3d6+2
+
+# Example 
+    roll(3,d6,+2)
 """ 
 function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::String=dice.name)
 
@@ -34,10 +38,13 @@ function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::Str
 end
 
 """
-     roll(n,dice,mod,[name])
+    roll(n,dice,mod,[name])
 
 This method is for non-standard numeric dice. E.g: Fugde dice. Calculation is done recursively
 mod::Int is a modifier to apply to each result
+
+# Example 
+    roll(4, fudge)
 """
 function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::String=dice.name)
     
@@ -91,7 +98,6 @@ Applies a function to each result. Slow when the number of possible results is h
         sum(r[2:end])
     end
 """
-
 function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice")   
 
     A = Array{Real,2}(undef,0,3)  

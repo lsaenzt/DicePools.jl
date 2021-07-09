@@ -1,25 +1,18 @@
 """
     roll(n,dice)
 
+Roll n symbol dice and add the results
+
 # Arguments
     - iter::Union{Int,OrdinalRange} -> number of dice o a range of values (E.g. 1:10)
     - dice::SymbolDice -> an already defined die 
-    - name::String="Dice" -> name of the die to be used in output 
 
 # Returns 
-A Namedtuple with column names and values: 
-    1.- Name of the die => number of dice
-    2.- One column for each types of results => total number of results
-    3.- Probability => probability of the combination of results
+    A DiceProbabilities struct that is Tables.jl compliant. 
+    
+# Example 
+        roll(1:5, MY0_Skill) |> DataFrame
 
-La función replica la filosofía del excel DicePools.xlsx
-
-    1.- Listado de las posibles combinaciones de resultados según dados. Ej: 3 resultos de 1 éxito, 1 de dos éxitos y otro blanco con 5 dados
-    2.- Calcular cuantas ordenaciones existen que den esos resultados. Ej: Primera: dado 1º,2º y 3º, 1 éxito, el 4º dos éxitos y el 5º blanco, 
-                                                                       Segunda: el 1º,2º y 4º, 1 éxito, el 3º dos éxitos y el 5º blanco, etc, etc.
-    3.- Calcular para una de esas ordenaciones cuantos casos existen teniendo en cuenta que hay resultados que aparecen varias veces (p.ej. si el blanco sale en 3 caras)
-    4.- El total de casos posibles son los casos para cada combinación de resultados * las posibles ordenaciones según dados
-    5.- La probabilidad es la cifra anterior entre el total de combinaciones de n dados de s caras (s^n)
 """
 function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
 
