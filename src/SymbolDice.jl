@@ -1,18 +1,14 @@
 """
     roll(n,dice)
 
-Roll n symbol dice and add the results
+Roll n symbol dice and add the results. Returns a Tables.jl compliant struct
 
 # Arguments
-    - iter::Union{Int,OrdinalRange} -> number of dice o a range of values (E.g. 1:10)
+    - n::Union{Int,OrdinalRange} -> number of dice o a range of values (E.g. 1:10)
     - dice::SymbolDice -> an already defined die 
 
-# Returns 
-    A DiceProbabilities struct that is Tables.jl compliant. 
-    
 # Example 
-        roll(1:5, MY0_Skill) |> DataFrame
-
+    roll(1:5, dicewithsymbols) 
 """
 function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
 
@@ -52,7 +48,7 @@ function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
     
     end #for
 
-# 3. Creates a DiceProbabilities struct that is Tables.jl compliant -> Can be directly used with |> DataFrame
+# 3. Creates a DiceProbabilities struct that is Tables.jl compliant
     cols = [Symbol(dice.name), dice.symbols...,:Probability]
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 

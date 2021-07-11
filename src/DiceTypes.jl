@@ -1,4 +1,4 @@
-export SymbolDice, CustomDice, StandardDice
+export SymbolDice, CustomDice, StandardDice, NumericDice
 
 abstract type Dice end
 "Numeric dice have results that are numbers to be added up"

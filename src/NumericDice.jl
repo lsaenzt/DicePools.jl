@@ -1,7 +1,7 @@
 # Note: Use Real for getting Int for the number of dice and results and float for probabilities
 """
     roll(n,dice,mod,[name])
-    
+
 Fast method for standard numeric rolls. E.g. 3d6+2
 
 # Example 
@@ -91,7 +91,7 @@ end
         f(r)
     end
 
-Applies a function to each result. Slow when the number of possible results is high.
+Applies a function to each individual result. Can be slow if the number of possible results is high.
 
 # Example. Drop lowest
     roll(3,d6) do r
@@ -140,13 +140,19 @@ function count_repeated(a::Array)
 end
 
 
-# Nota: Las funciones siguientes no se pueden llamar "roll". El multiple dispatch toma sólo argumentos posiciones y se confunde entre estas dos y la de antes
+# Nota: Las funciones siguientes no se pueden llamar "roll". El multiple dispatch toma sólo argumentos posicionales y se confunde entre estas dos y la de antes
 """
-    rollanddrop(n,dice,mod;[droplowest=0],[drophighest=0],[name])
+    drop(n,dice,mod;[droplowest=0],[drophighest=0],[name])
 
-Method for dropping lowest or highest results with kwarg 'droplowest::Int' and/or 'drophighest::Int'
+Drop lowest or highest results
+
+# Arguments
+ - droplowest::Int' and/or 'drophighest::Int': number of dice to be dropped
+
+# Example
+drop(5,d8; droplowest=2)
 """ 
-function rollanddrop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice") 
+function drop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice") 
 
     (droplowest+drophighest)>n && return error("More dice dropped than the number of dice rolled")
 
