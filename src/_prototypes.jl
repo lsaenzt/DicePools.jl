@@ -126,6 +126,39 @@ dummy(n::Int, a::Int, mod::Int=0)=n*a+mod
 
 dummy(n::Int, a::Real;s=1)=n*a^s
 
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# DEPRECATED roll+function method. Does not work with repeated values
+#-----------------------------------------------------------------------------------------------------------------------------
+
+function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
+
+    A = Array{Real,2}(undef,0,3)  
+
+    for nᵢ in n
+    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
+    c = with_replacement_combinations(dice.results,nᵢ)
+    allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir
+
+    r = OrderedDict{Int, Real}() 
+        for cᵢ in c
+            rep = count_repeated(cᵢ)          
+            reord = multinomial(rep...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados con 4 y 3 dados con 2 
+            prob = reord/allcomb*100
+            s = f(cᵢ)
+            r[s] = get(r,s,0) + prob
+        end
+    sort!(r)
+    # 2. Concatenate results
+    A = vcat(A,hcat(fill(nᵢ,length(r)),collect(keys(r)),collect(values(r))))
+    end
+
+    # 3. Creates a DiceProbabilties Struc
+    cols = [Symbol(name),:Result,:Probability]
+    DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
+end
+
+
 #-----------------------------------------------------------------------------------------------------------------------------
 # COUNT DUPLICATES
 #-----------------------------------------------------------------------------------------------------------------------------

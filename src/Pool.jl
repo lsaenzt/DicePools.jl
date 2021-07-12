@@ -11,7 +11,7 @@ function pool(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities.
     
     rs = (r1,r2,ri...)
     l = size.(data.(rs),1)      # Length of each Table
-    L = prod(l)                 # Total length of output
+    L = prod(l)                 # Total length of outputrs
 
     tempr = Array{Real}(undef,L,sum(length.(rs))) # Num of data columns is the total
     
@@ -37,7 +37,7 @@ function pool(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities.
     for rᵢ in rs # Results later
         push!(colname, headers(rᵢ)[dicenamecols(rᵢ)+1:end-1]...) # Rest of columns except Probability
     end
-    colname = union(colname)
+    colname = union(colname) # Unque name columns
 
     # Column Consolidation
     r = Array{Real}(undef,L,length(colname)+1) # One more columns for :Probability
@@ -46,7 +46,7 @@ function pool(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities.
         r[:,i] = sum(tempr[:,j.==tempnames],dims=2) # Sums columns with the same name as j
     end
     # Probability calculation
-        r[:,end] = prod(tempr[:,:Probability.==tempnames],dims=2)./100 # Multiplies probabilities
+        r[:,end] = prod(tempr[:,:Probability.==tempnames],dims=2)./(100^(length(rs)-1)) # Multiplies probabilities
  
     cols = [colname...,:Probability]
  

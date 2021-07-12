@@ -1,5 +1,5 @@
 """
-    roll(n,dice)
+    roll(n,dice;name=dice.name)
 
 Roll n symbol dice and add the results. Returns a Tables.jl compliant struct
 
@@ -10,7 +10,7 @@ Roll n symbol dice and add the results. Returns a Tables.jl compliant struct
 # Example 
     roll(1:5, dicewithsymbols) 
 """
-function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
+function roll(n::Union{Int,OrdinalRange},dice::SymbolDice;name::String=dice.name) 
 
    A = Array{Int64,2}(undef,0,length(dice.symbols)+2)
 
@@ -25,7 +25,8 @@ function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
 
         for (j,sidecombs) in enumerate(c)
 
-            reord = multinomial(sidecombs...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados blancos y 3 dados éxitos 
+            s = sidecombs[sidecombs.>0] # Eliminate zeros to speed up splat operator in next line
+            reord = multinomial(s...)   # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados blancos y 3 dados éxitos 
             events = reord*(.*(dice.sidesfreq.^sidecombs...)) # Todas las posibilidades teniendo en cuenta cuando hay caras iguales. Ej: hay 4 caras con resultados blanco en cada dado
             prob = events/allcomb*100
         
@@ -49,7 +50,7 @@ function roll(n::Union{Int,OrdinalRange},dice::SymbolDice)
     end #for
 
 # 3. Creates a DiceProbabilities struct that is Tables.jl compliant
-    cols = [Symbol(dice.name), dice.symbols...,:Probability]
+    cols = [Symbol(name), dice.symbols...,:Probability]
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 
 end

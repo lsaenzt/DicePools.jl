@@ -1,32 +1,38 @@
 using Test, .DicePools
 
-using DataFrames, Statistics
-
 # Standard die
     
     std = roll(10,d100);
-@test sum(std.Probability)-100 <= 0.001
+@test abs(sum(std.Probability)-100) <= 0.001
 
 # Custom die
     
     custom = roll(10,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5]));
-@test sum(custom.Probability)-100 <= 0.001
+@test abs(sum(custom.Probability)-100) <= 0.001
 
 # Custom operation
     
     customf = roll(5,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5])) do r
                 sum(abs.(r))+2
             end
-@test sum(customf.Probability)-100 <= 0.001
+@test abs(sum(customf.Probability)-100) <= 0.001
 
+# Non-standard numeric roll
 
-# Conan Damage Dice
+    beat = beattarget(5,d12; target = 10);
+@test sum(beat.Probability)-100 <= 0.001
 
-    Conan_Dmg = DicePools.CategoricalDice([["Hit"],["Hit","Hit"],["Blank"],["Hit","Effect"]],[1,1,2,2]);
+    below = belowtarget(5,d12; target = 10);
+@test sum(below.Probability)-100 <= 0.001
 
-    tdf = DicePools.roll(3:10,Conan_Dmg,name="Conan")|> DataFrame;
+# Symbol Dice
 
-    psum = combine(groupby(tdf,:Conan),:Probability => sum);
+    symd = DicePools.roll(3:6,Conan_Dmg)
+
+    @test sum(data(symd)[data(symd)[:,1].==3,5])-100 <= 0.001
+    @test sum(data(symd)[data(symd)[:,1].==4,5])-100 <= 0.001
+    @test sum(data(symd)[data(symd)[:,1].==5,5])-100 <= 0.001
+    @test sum(data(symd)[data(symd)[:,1].==6,5])-100 <= 0.001
 
 @test unique(round.(psum[:,2], digits=2)) == [100.0] #Test all probabilities add up 100%
 
@@ -38,28 +44,10 @@ using DataFrames, Statistics
 
 @test maximum(round.(cumchance.MoreThan,digits=2)) <= 100
 
-# MYZ Attribute Dice
+# Pooling
 
-    MY0_Attr = DicePools.CategoricalDice([["Success"],["Blank"],["Harm"]],[1,4,1])
+pl = pool(beat,below,custom);
+@test abs(sum(pl.Probability)-100) <= 0.001 
 
-    tdf = DicePools.roll(1:15,MY0_Attr,name="MY0")|> DataFrame
-
-    psum = combine(groupby(tdf,:MY0),:Probability => sum) 
-
-@test unique(round.(psum[:,2], digits=2)) == [100.0]
-
-    chance = sort!(combine(groupby(tdf,[:MY0,:Success]),:Probability => sum => :Probability),[:MY0,:Success]) # Probabities for each number of dice and number of Hits
-
-@test maximum(chance.Probability)<=100
-
-    cumchance = transform(groupby(chance,[:MY0]),[:Success,:Probability] => ((s,p) -> sum(p.*[s.<=i for i in s])) => :MoreThan) 
-
-@test maximum(round.(cumchance.MoreThan,digits=2)) <= 100
-
-
-#= Explanatory note of ((s,p) -> sum(p.*[s.<=i for i in s]))
-    1.- Pasamos el vector S "success" y el p "probability" 
-    2.- Generamos un matriz que tiene para cada fila un vector que indica si S es mayor que el valor individual de fila i
-    3.- Multiplicamos cada elemento de P por cada Array anterior 
-    4.- Sumamos el vector resultanto de lo anterior
-=#
+pl2 = pool(customf,symd);
+@test abs(sum(pl2.Probability)-4*100) <= 0.001 #There a 4 dice groups in symd (3,4,5,6)

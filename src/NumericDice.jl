@@ -1,6 +1,9 @@
-# Note: Use Real for getting Int for the number of dice and results and float for probabilities
+# Note: Usage of Real for getting Int for the number of dice and results and float for probabilities
+#------------------------------------------------------------------------------------------------------
+# roll functions
+#------------------------------------------------------------------------------------------------------
 """
-    roll(n,dice,mod,[name])
+    roll(n,dice,mod,[name=dice.name])
 
 Fast method for standard numeric rolls. E.g. 3d6+2
 
@@ -38,13 +41,13 @@ function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::Str
 end
 
 """
-    roll(n,dice,mod,[name])
+    roll(n,dice,mod,[name=dice.name])
 
 This method is for non-standard numeric dice. E.g: Fugde dice. Calculation is done recursively
 mod::Int is a modifier to apply to each result
 
 # Example 
-    roll(4, fudge)
+    roll(4, custom)
 """
 function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::String=dice.name)
     
@@ -87,7 +90,7 @@ function recursiveroll_sum(n,dice::NumericDice)
 end
 
 """
-    roll(n,dice,[name]) do r
+    roll(n,dice,[name=dice.name]) do r
         f(r)
     end
 
@@ -98,33 +101,37 @@ Applies a function to each individual result. Can be slow if the number of possi
         sum(r[2:end])
     end
 """
-function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice")   
+function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
 
-    A = Array{Real,2}(undef,0,3)  
+    A = Array{Real,2}(undef,0,3)
+    die = dice.results
+    idx = [i for i in 1:length(die)] # Index is created to take into account repeated values in a Customdice
 
     for nᵢ in n
     # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
-    c = with_replacement_combinations(dice.results,nᵢ)
-    allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
+    allcomb = dice.sides^nᵢ # All possible combinations for the given number of sides and dice
+    c = with_replacement_combinations(idx,nᵢ)
+
     r = OrderedDict{Int, Real}() 
         for cᵢ in c
-            rep = count_repeated(cᵢ)          
+            rep = count_repeated(cᵢ)    # This allows faster splat in the next line       
             reord = multinomial(rep...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados con 4 y 3 dados con 2 
             prob = reord/allcomb*100
-            s = f(cᵢ)
+            s = f(@view die[cᵢ]) # Function applied to the individual results
             r[s] = get(r,s,0) + prob
         end
     sort!(r)
+
     # 2. Concatenate results
     A = vcat(A,hcat(fill(nᵢ,length(r)),collect(keys(r)),collect(values(r))))
     end
 
-    # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
+    # 3. Creates a DiceProbabilties Struct
     cols = [Symbol(name),:Result,:Probability]
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 end
 
-"Count repeated values in an ordered array" # Sustituye el uso de multiexponents(dice.sides,nᵢ) que es más lento.
+"Count repeated values in an ordered array" # Avoids using multiexponents(cᵢ...) in roll(f,n,dice) function which is slower
 function count_repeated(a::Array)
     i = 1
     d = 1
@@ -139,7 +146,9 @@ function count_repeated(a::Array)
     digits(i) # Descomposición de número
 end
 
-
+#------------------------------------------------------------------------------------------------------
+# roll functions
+#------------------------------------------------------------------------------------------------------
 # Nota: Las funciones siguientes no se pueden llamar "roll". El multiple dispatch toma sólo argumentos posicionales y se confunde entre estas dos y la de antes
 """
     drop(n,dice,mod;[droplowest=0],[drophighest=0],[name])

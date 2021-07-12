@@ -1,37 +1,37 @@
 export SymbolDice, CustomDice, StandardDice, NumericDice
 
 abstract type Dice end
-"Numeric dice have results that are numbers to be added up"
+"Numeric dice have numbers in their sides"
 abstract type NumericDice <:Dice end
 
-"A numeric dice with any combination of numbers "
+"A numeric dice with any combination of numbers"
 struct CustomDice <:NumericDice
-    name::String
     sides::Int #e.g. 3
-    results::Vector{Int} #e.g. [-1,0,1]
+    results::Vector{Int} #e.g. [-2,-1,0,0,1,2]
+    name::String
 
-    CustomDice(n,s,r) = s != length(r) ? error("number of sides do not match number of results") : new(n,s,sort(r))
+    CustomDice(s,r,n) = s != length(r) ? error("number of sides do not match number of results") : new(s,sort(r),n)
 end
 
 "StandardDice have values ranging from 1 to number of sides. E.g. 1:20"
 struct StandardDice <:NumericDice
-    name::String
     sides::Int #e.g. 8
     results::UnitRange{Int} #e.g. 1:8
+    name::String
 end
 
 "Outer constructors for NumericDice"
-CustomDice(r::Vector{Int}) = CustomDice("Dice",length(r),r)
-CustomDice(r::Vector{Int},name::String) = CustomDice(name,length(r),r)
-StandardDice(s::Int) = StandardDice(string("d",s),s,1:s)
+CustomDice(r::Vector{Int}) = CustomDice(length(r),r,"Dice")
+CustomDice(r::Vector{Int},name::String) = CustomDice(length(r),r,name)
+StandardDice(s::Int) = StandardDice(s,1:s,string("d",s))
 
 "Symbol dice produce descriptive results that are combined"
 struct SymbolDice <: Dice 
-    name::String
     sides::Int #e.g. 12
     sidesfreq::Vector{Int} #[1,2,2,1,3,2,1] # How many times a specific side is repeated in the die. The order must match "symbolsinside"
     symbols::Vector{Symbol} #[:blank, :success, :advantage, :triumph]
     symbolsinside::Vector{Vector{Int}} #[[1,0,0,0], [0,1,0,0],[0,2,0,0],[0,0,1,0],[0,1,1,0],[0,0,2,0],[0,0,0,1]]
+    name::String
 end
 
 "User 'friendly' Constructor for Symbol dice"
@@ -64,7 +64,7 @@ function SymbolDice(sides::Array,freq::Array=[],name::String="Dice")
     end
 
     s = Symbol.(s)
-    SymbolDice(name,sum(p),p,s,m) 
+    SymbolDice(sum(p),p,s,m,name) 
 end
 
 
