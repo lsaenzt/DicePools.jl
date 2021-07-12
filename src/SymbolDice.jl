@@ -19,7 +19,7 @@ function roll(n::Union{Int,OrdinalRange},dice::SymbolDice;name::String=dice.name
 
     c = multiexponents(length(dice.sidesfreq),nᵢ)  # multiexponents return an iterable
     
-    allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir
+    allcomb = dice.sides^nᵢ # All possible combinations for the given number of sides and dice
 
     r= Array{Any}(undef,length(c), 2)
 

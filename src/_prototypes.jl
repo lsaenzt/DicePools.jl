@@ -131,7 +131,7 @@ dummy(n::Int, a::Real;s=1)=n*a^s
 # DEPRECATED roll+function method. Does not work with repeated values
 #-----------------------------------------------------------------------------------------------------------------------------
 
-function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
+function rollOLD(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
 
     A = Array{Real,2}(undef,0,3)  
 
