@@ -67,7 +67,6 @@ function SymbolDice(sides::Array,freq::Array=[],name::String="Dice")
     SymbolDice(sum(p),p,s,m,name) 
 end
 
-
 "TODO hybrid dice"
 struct HybridDice <:Dice
     name::String

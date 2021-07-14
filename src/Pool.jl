@@ -57,9 +57,9 @@ end
 function collapse(d::Array{Real})
     
         s = Set()
-        output =Array{Real}(d[1:0, :])        # Empty matrix with no rows and same columns as dp. Trick from Timeseries.jl
-        groups = Array{Int}(d[:,1:end-1])     # Matrix with columns to groups
-        prob = Vector{Float64}(d[:,end]) # Probabilities
+        output =Array{Real}(d[1:0, :])       # Empty matrix with no rows and same columns as dp. Trick from Timeseries.jl
+        groups = Array{Int}(d[:,1:end-1])    # Matrix with columns to group
+        prob = Vector{Float64}(d[:,end])     # Probabilities
         temp = Vector{Real}(undef,size(d,2)) # Vector of type Real to store Int for results and Float for Probabilities
 
         for i in eachrow(groups)
@@ -69,7 +69,7 @@ function collapse(d::Array{Real})
             temp[1:end-1]= i # temp filled in two steps to avoid promotion to Float
             temp[end]=p      # idem.
             output = [output; temp |> permutedims]
-            push!(s,i)              # Save row as computed
+            push!(s,i)       # Save row as computed
         end
 
     return output

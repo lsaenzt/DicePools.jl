@@ -54,10 +54,10 @@ function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::Strin
     A = Array{Real,2}(undef,0,3) 
 
     for nᵢ in n
-        r = recursiveroll_sum(nᵢ,dice)
-        (mod != 0) && (r[:,1] = r[:,1].+mod)
+        r,p = recursiveroll_sum(nᵢ,dice)
+        (mod != 0) && (r = r.+mod)
 
-    A = vcat(A,hcat(fill(nᵢ,size(r,1)),r))
+    A = vcat(A,hcat(fill(nᵢ,length(r)),r,p))
     end
 
     name = (mod==0) ? name : string(n,name,"+",mod)
@@ -67,27 +67,26 @@ end
 
 function recursiveroll_sum(n,dice::NumericDice)
 
-    basedie = Real[dice.results fill(100/dice.sides,dice.sides)]
+    dr = dice.results 
+    dp = fill(100/dice.sides,dice.sides)
+    
     if n==1
-        ur = unique(basedie[:,1])
-        p = [sum([(c == x)*f for (c,f) in zip(basedie[:,1],basedie[:,2])]) for x in ur]
-        r = Real[ur p]
+        ur = unique(dr)
+        p = [sum([(c == x)*f for (c,f) in zip(dr,dp)]) for x in ur]
+
     else
-        d₋₁ = recursiveroll_sum(n-1,dice)
+        dr₋₁,dp₋₁ = recursiveroll_sum(n-1,dice)
 
-        dˢ = repeat(d₋₁,inner = (dice.sides,1))
-        sᵈ = repeat(basedie,outer = (size(d₋₁,1),1))
-
-        results = dˢ[:,1].+sᵈ[:,1]
-        freq = dˢ[:,2].*sᵈ[:,2]/100
+        results = [i+j for i in dr₋₁, j in dr]
+        freq = [i*j/100 for i in dp₋₁, j in dp]
 
         ur = unique(results)
         p = [sum([(c == x)*f for (c,f) in zip(results,freq)]) for x in ur]
         
-        r = Real[ur p]
     end
-    return r
+    return ur,p
 end
+
 
 """
     roll(n,dice,[name=dice.name]) do r
