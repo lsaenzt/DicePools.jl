@@ -93,7 +93,8 @@ end
         f(r)
     end
 
-Applies a function to each individual result. Can be slow if the number of possible results is high.
+Applies a function to each individual result. 
+Calculate every single possible result. It takes time if the number of possibilities is high.
 
 # Example. Drop lowest
     roll(3,d6) do r
@@ -103,20 +104,19 @@ Applies a function to each individual result. Can be slow if the number of possi
 function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
 
     A = Array{Real,2}(undef,0,3)
-    die = dice.results
-    idx = [i for i in 1:length(die)] # Index is created to take into account repeated values in a Customdice
+    idx = 1:dice.sides # Combinations on idx deals with repeated values in a Customdice
 
     for nᵢ in n
-    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
+    # 1. Calculate the probability each combination of sides. First taking into account combinations of results and secondly considering repeated sides on a die
     allcomb = dice.sides^nᵢ # All possible combinations for the given number of sides and dice
     c = with_replacement_combinations(idx,nᵢ)
+    r = OrderedDict{Int, Real}()
 
-    r = OrderedDict{Int, Real}() 
         for cᵢ in c
             rep = count_repeated(cᵢ)    # This allows faster splat in the next line       
-            reord = multinomial(rep...) # Todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados con 4 y 3 dados con 2 
+            reord = multinomial(rep...) # All possible dice combinatios that lead to the same result. E.g. 20 ways of getting 3 dice with one result and 3 dice with other
             prob = reord/allcomb*100
-            s = f(@view die[cᵢ]) # Function applied to the individual results
+            @inbounds s = f(@view dice.results[cᵢ]) # Function applied to the individual results
             r[s] = get(r,s,0) + prob
         end
     sort!(r)
@@ -240,39 +240,3 @@ function sampleroll(f::Function, n::Int,d::NumericDice, rep::Int)
 
     return [ur freq]
 end
-
-
-#---------------------------------------------------------------------------------------------------------------------------------------------
-
-#= OLD VERSION
-
-function roll(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0,name::String="Dice")
-    
-    A = Array{Int64,2}(undef,0,3)
- 
-    for nᵢ in n
-    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
-    # Todas las combinaciones de resultado. Ej: 1) 6 ochos 2) 3 seises, 2 unos y 1 tres...
-    c = multiexponents(dice.sides,nᵢ)
-    allcomb = dice.sides^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
-    r = OrderedDict{Int, Number}()
- 
-        for cᵢ in c
-            reord = multinomial(cᵢ...) # Variaciones: todas las ordenaciones de dados que pueden dar esa combinación de resultados Ej. 3 dados on 4 y 3 dados 2 
-            prob = reord/allcomb*100            
-            s = sum(cᵢ.*dice.results) + mod
-            r[s] = get(r,s,0) + prob         
-        end
-
-     rₛ = sort(r)
-     
- # 2. Concatenates results
-    A = vcat(A,hcat(fill(n,length(r)),collect(keys(rₛ)),collect(values(rₛ))))
-
-    end
- # 3. Creates a Namedtuple with the results. Can be directly usesd with |> DataFrame
- 
-     n = [Symbol(name),:Result,:Probability]   
-     DicePools.DiceProbabilities(n,1,A,Dict([j => i for (i,j) in enumerate(n)])) # Struct Table.jl compliant
- end
-=#
