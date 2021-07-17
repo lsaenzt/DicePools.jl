@@ -3,14 +3,15 @@
 # roll functions
 #------------------------------------------------------------------------------------------------------
 """
-    roll(n,dice,mod,[name=dice.name])
+    roll(n,dice,mod;[name=dice.name])
 
-Fast method for standard numeric rolls. E.g. 3d6+2
+mod::Int is a modifier to apply to each result
 
-# Example 
+# Example    
     roll(3,d6,+2)
+    roll(4, custom;name="foo")
 """ 
-function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::String=dice.name)
+function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::String=dice.name) # Fast method for StandardDice
 
     A = Array{Real,2}(undef,0,3) 
     s = dice.sides
@@ -40,16 +41,7 @@ function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::Str
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Tables.jl compliant
 end
 
-"""
-    roll(n,dice,mod,[name=dice.name])
-
-This method is for non-standard numeric dice. E.g: Fugde dice. Calculation is done recursively
-mod::Int is a modifier to apply to each result
-
-# Example 
-    roll(4, custom)
-"""
-function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::String=dice.name)
+function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::String=dice.name) # Method for non-standard numeric dice. Calculation is done recursively
     
     A = Array{Real,2}(undef,0,3) 
 
@@ -87,9 +79,8 @@ function recursiveroll_sum(n,dice::NumericDice)
     return ur,p
 end
 
-
 """
-    roll(n,dice,[name=dice.name]) do r
+    customroll(n,dice,[name=dice.name]) do r
         f(r)
     end
 
@@ -97,11 +88,11 @@ Applies a function to each individual result.
 Calculate every single possible result. It takes time if the number of possibilities is high.
 
 # Example. Drop lowest
-    roll(3,d6) do r
+    customroll(3,d6) do r
         sum(r[2:end])
     end
 """
-function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
+function customroll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
 
     A = Array{Real,2}(undef,0,3)
     idx = 1:dice.sides # Combinations on idx deals with repeated values in a Customdice
@@ -130,7 +121,7 @@ function roll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::Str
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Table.jl compliant
 end
 
-"Count repeated values in an ordered array" # Avoids using multiexponents(cᵢ...) in roll(f,n,dice) function which is slower
+"Count repeated values in an ordered array" # Avoids using multiexponents(cᵢ...) in roll(f,n,dice) which is slower
 function count_repeated(a::Array)
     i = 1
     d = 1
@@ -158,13 +149,13 @@ Drop lowest or highest results
  - droplowest::Int' and/or 'drophighest::Int': number of dice to be dropped
 
 # Example
-drop(5,d8; droplowest=2)
+    drop(5,d8; droplowest=2)
 """ 
 function drop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice") 
 
     (droplowest+drophighest)>n && return error("More dice dropped than the number of dice rolled")
 
-    roll(n,dice) do r
+    customroll(n,dice,name) do r
         sum(r[begin+droplowest:end-drophighest]) + mod
     end
 end
@@ -172,7 +163,7 @@ end
 """
     takemid(n,dice,[mod=0];[mid=1],[name])
 
-Methods for choose mid results with kwarg 'mid::Int'
+Sum mid dice results. The number of mid dice to sum is set by the 'mid::Int' keyword
 """ 
 function takemid(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;mid=1,name="Dice")
     
@@ -181,7 +172,7 @@ function takemid(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;mid=1,n
     l = n - mid
     drop = div(l,2)
     
-    roll(n,dice) do r
+    customroll(n,dice,name) do r
         sum(r[begin+drop:end-drop-isodd(l)]) + mod
     end
 end

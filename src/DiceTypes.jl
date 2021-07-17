@@ -4,6 +4,13 @@ abstract type Dice end
 "Numeric dice have numbers in their sides"
 abstract type NumericDice <:Dice end
 
+"StandardDice have values ranging from 1 to number of sides. E.g. 1:20"
+struct StandardDice <:NumericDice
+    sides::Int #e.g. 8
+    results::UnitRange{Int} #e.g. 1:8
+    name::String
+end
+
 "A numeric dice with any combination of numbers"
 struct CustomDice <:NumericDice
     sides::Int #e.g. 3
@@ -11,13 +18,6 @@ struct CustomDice <:NumericDice
     name::String
 
     CustomDice(s,r,n) = s != length(r) ? error("number of sides do not match number of results") : new(s,sort(r),n)
-end
-
-"StandardDice have values ranging from 1 to number of sides. E.g. 1:20"
-struct StandardDice <:NumericDice
-    sides::Int #e.g. 8
-    results::UnitRange{Int} #e.g. 1:8
-    name::String
 end
 
 "Outer constructors for NumericDice"

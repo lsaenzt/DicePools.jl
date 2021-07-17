@@ -30,7 +30,7 @@ using .DicePools
     double target (e.g. Conand20: 1 success or 2 successes)
     change symboldice from array of arrays to array...(splat)
     [DONE] Groupby combined dice
-    docs
+    docs  (WIP)
 =#
 
 #= Note
