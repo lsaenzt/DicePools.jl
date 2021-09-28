@@ -9,7 +9,7 @@ A little example
     eights = roll(1:3,d8)
     special = roll(1:4,symboldice)
     results = pool(eigth,special)
-    DataFrame(result)
+    DataFrame(results)
     CSV.write(results)
 ```
 

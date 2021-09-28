@@ -189,11 +189,11 @@ function beattarget(n,dice::NumericDice;target::Int=maximum(dice.results),name=d
 end
 
 """
-    belowtarget(n,dice;target=maximum(dice.results),equal=true, [name])
+    rollunder(n,dice;target=maximum(dice.results),equal=true, [name])
 
 Roll below a target number with n dice. If equal is set to true, matching the target counts as success
 """ 
-function belowtarget(n,dice::NumericDice;target::Int=maximum(dice.results),name=dice.name, equal=true) 
+function rollunder(n,dice::NumericDice;target::Int=maximum(dice.results),name=dice.name, equal=true) 
     equal ? (f = ≤) : (f = <) # if equal is true use equal or less, else use less
     dice = CustomDice([f(i,target) ? 1 : 0 for i in dice.results],name) # Sides that count as 1 success
     roll(n,dice)
@@ -208,7 +208,7 @@ Single random result of die roll
 function singleroll(n::Int,d::NumericDice,mod::Int=0)
     s=0
     for i in 1:n
-        s = s+ rand(d.results)
+        s = s + rand(d.results)
     end
     return s+mod
 end
@@ -216,7 +216,7 @@ end
 """
 Sample of 'rep' rolls of an 'n' dice of type 'd' applying 'f' to each result
 """
-function sampleroll(f::Function, n::Int,d::NumericDice, rep::Int)
+function sampleroll(f::Function, n::Int, d::NumericDice, rep::Int)
     res = Vector{Int}(undef,rep)
     for i in 1:rep
         r = Vector{Int}(undef,d.sides)

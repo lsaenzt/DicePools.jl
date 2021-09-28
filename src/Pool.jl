@@ -53,7 +53,7 @@ function pool(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities.
     DicePools.DiceProbabilities(cols, n, collapse(r), Dict([j => i for (i,j) in enumerate(cols)]))
 end
 
-"Consolidates repeated results in a combination"
+"Consolidates repeated results when pooling"
 function collapse(d::Array{Real})
     
         s = Set()

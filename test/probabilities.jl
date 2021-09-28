@@ -12,7 +12,7 @@ using Test, .DicePools
 
 # Custom operation
     
-    customf = roll(5,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5])) do r
+    customf = DicePools.customroll(5,CustomDice([-5,-4,-3,-2,-1,0,0,0,1,2,3,4,5])) do r
                 sum(abs.(r))+2
             end
 @test abs(sum(customf.Probability)-100) <= 0.001
@@ -22,7 +22,7 @@ using Test, .DicePools
     beat = beattarget(5,d12; target = 10);
 @test sum(beat.Probability)-100 <= 0.001
 
-    below = belowtarget(5,d12; target = 10);
+    below = rollunder(5,d12; target = 10);
 @test sum(below.Probability)-100 <= 0.001
 
 # Symbol Dice
@@ -33,16 +33,6 @@ using Test, .DicePools
     @test sum(data(symd)[data(symd)[:,1].==4,5])-100 <= 0.001
     @test sum(data(symd)[data(symd)[:,1].==5,5])-100 <= 0.001
     @test sum(data(symd)[data(symd)[:,1].==6,5])-100 <= 0.001
-
-@test unique(round.(psum[:,2], digits=2)) == [100.0] #Test all probabilities add up 100%
-
-    chance = sort!(combine(groupby(tdf,[:Conan,:Hit]),:Probability => sum => :Probability),[:Conan,:Hit]); # Probabities for each number of dice and number of Hits
-
-@test maximum(chance.Probability)<=100
-
-    cumchance = transform(groupby(chance,[:Conan]),[:Hit,:Probability] => ((s,p) -> sum(p.*[s.<=i for i in s])) => :MoreThan);
-
-@test maximum(round.(cumchance.MoreThan,digits=2)) <= 100
 
 # Pooling
 
