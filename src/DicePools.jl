@@ -23,14 +23,17 @@ end # module
 using .DicePools
 
 #= ToDO List
-    macro @roll 3d6+1
-    reroll numeric
-    exploding dice (~ reroll 'x' times)
-    hybrid dice (e.g. The one ring: d10 plus symbols)
-    double target (e.g. Conand20: 1 success or 2 successes)
-    change symboldice from array of arrays to array...(splat)
-    [DONE] Groupby combined dice
-    docs  (WIP)
+    1.- [DONE]Subsract dice -> add method -(DiceProbabilities), -(DiceProbabilities,DiceProbabilities), 
+    2.- [DONE]Also, +(DiceProbabilities,DiceProbabilities...), +(StandardDice, Int), *(Int,Dice)
+    3.- [DONE] macro @roll 3d6+1 -> Not useful if 1 & 2 work
+    4.- Solve sorting results when substracting dice
+    4.- reroll numeric
+    5.- exploding dice (~ reroll 'x' times)
+    6.- hybrid dice (e.g. The one ring: d10 plus symbols)
+    7.- double target (e.g. Conand20: 1 success or 2 successes)
+    8.- change symboldice from array of arrays to array...(splat)
+    9.- [DONE] Groupby combined dice
+    10.- [WIP] docs
 =#
 
 #= Note

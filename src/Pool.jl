@@ -3,8 +3,6 @@
 
 Combines the results of several dice rolls into one table
 
-TODO: Group results
-
     pool(r,t,s)
 """
 function pool(r1::DiceProbabilities,r2::DiceProbabilities,ri::DiceProbabilities...)
@@ -66,8 +64,8 @@ function collapse(d::Array{Real})
             in(i,s) && continue     # If the row has been already computed skip to next iteration
                       
             p = sum([(k==i) for k in eachrow(groups)].* prob)
-            temp[1:end-1]= i # temp filled in two steps to avoid promotion to Float
-            temp[end]=p      # idem.
+            temp[1:end-1] = i # temp filled in two steps to avoid promotion to Float
+            temp[end] = p      # idem.
             output = [output; temp |> permutedims]
             push!(s,i)       # Save row as computed
         end

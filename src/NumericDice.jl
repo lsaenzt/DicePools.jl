@@ -231,3 +231,33 @@ function sampleroll(f::Function, n::Int, d::NumericDice, rep::Int)
 
     return [ur freq]
 end
+
+#---------------------------------------------------------------------------------------------------
+# Methods for Julia.Base arithmetic functions with Dice
+#---------------------------------------------------------------------------------------------------
+import Base.*, Base.+, Base.-
+
+*(n::Int, d::Dice) = roll(n,d)
+
++(a::DiceProbabilities,b::DiceProbabilities,c::DiceProbabilities...) = pool(a,b,c...)
+
+function +(a::DiceProbabilities,b::Int)
+    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    data(a)[:,end-1] = data(a)[:,end-1] .+ b
+    a
+end
+
+function -(a::DiceProbabilities,b::Int)
+    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    data(a)[:,end-1] = data(a)[:,end-1] .- b
+    a
+end
+
+function -(a::DiceProbabilities,b::DiceProbabilities)
+    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    (length(headers(b)) - dicenamecols(b)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    
+    headers(b)[1] = Symbol("-",headers(b)[1])
+    data(b)[:,end-1] = data(b)[:,end-1] .* -1
+    pool(a,b)
+end
