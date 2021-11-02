@@ -11,7 +11,9 @@ mod::Int is a modifier to apply to each result
     roll(3,d6,+2)
     roll(4, custom;name="foo")
 """ 
-function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::String=dice.name) # Fast method for StandardDice
+function roll(n::Union{Int,UnitRange{Int}},dice::StandardDice,mod::Int=0;name::String=dice.name) # Fast method for StandardDice
+
+    minimum(n)<=0 && return error("Must roll a positive number of dice")
 
     A = Array{Real,2}(undef,0,3) 
     s = dice.sides
@@ -41,8 +43,10 @@ function roll(n::Union{Int,OrdinalRange},dice::StandardDice,mod::Int=0;name::Str
     DicePools.DiceProbabilities(cols,1,A,Dict([j => i for (i,j) in enumerate(cols)])) # Struct Tables.jl compliant
 end
 
-function roll(n::Union{Int,OrdinalRange},dice::CustomDice,mod::Int=0;name::String=dice.name) # Method for non-standard numeric dice. Calculation is done recursively
-    
+function roll(n::Union{Int,UnitRange{Int}},dice::CustomDice,mod::Int=0;name::String=dice.name) # Method for non-standard numeric dice. Calculation is done recursively
+  
+    minimum(n)<=0 && return error("Must roll a positive number of dice")
+
     A = Array{Real,2}(undef,0,3) 
 
     for nᵢ in n
@@ -92,7 +96,9 @@ Calculate every single possible result. It takes time if the number of possibili
         sum(r[2:end])
     end
 """
-function customroll(f::Function,n::Union{Int,OrdinalRange},dice::NumericDice;name::String="Dice") 
+function customroll(f::Function,n::Union{Int,UnitRange{Int}},dice::NumericDice;name::String="Dice") 
+
+    minimum(n)<=0 && return error("Must roll a positive number of dice")
 
     A = Array{Real,2}(undef,0,3)
     idx = 1:dice.sides # Combinations on idx deals with repeated values in a Customdice
@@ -200,6 +206,8 @@ function rollunder(n,dice::NumericDice;target::Int=maximum(dice.results),name=di
 end
 
 
+function reroll(n::Union{Int,UnitRange{Int}},dice::CustomDice,mod::Int=0;reroll::Int, name::String=dice.name) end
+
 function explode() end
 
 """
@@ -257,7 +265,23 @@ function -(a::DiceProbabilities,b::DiceProbabilities)
     (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
     (length(headers(b)) - dicenamecols(b)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
     
-    headers(b)[1] = Symbol("-",headers(b)[1])
-    data(b)[:,end-1] = data(b)[:,end-1] .* -1
-    pool(a,b)
+    # Modifications for the 'negative' die
+    headers(b)[1] = Symbol("-",headers(b)[1]) # Die name with a minus
+    data(b)[:,end-1] = data(b)[:,end-1] .* -1 # Results negative for substracting
+    # Sorting probabilities to get the results also sorted when 'pooled'
+    sorted_b = DiceProbabilities(headers(b), dicenamecols(b), sortslices(data(b),dims=1,by= x -> x[end-1]), Dict([j => i for (i,j) in enumerate(headers(b))]))
+   
+    pool(a,sorted_b)
+end
+
+# Does not work for -3d6 as -3 goes before. -(3d6) works but not user-friendly
+function -(a::DiceProbabilities)
+    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    
+    # Modifications for the 'negative' die
+    headers(a)[1] = Symbol("-",headers(a)[1]) # Die name with a minus
+    data(a)[:,end-1] = data(a)[:,end-1] .* -1 # Results negative for substracting
+    # Sorting probabilities to get the results also sorted when 'pooled'
+    DiceProbabilities(headers(a), dicenamecols(a), sortslices(data(a),dims=1,by= x -> x[end-1]), Dict([j => i for (i,j) in enumerate(headers(a))]))
+   
 end

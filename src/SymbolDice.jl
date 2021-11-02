@@ -10,18 +10,20 @@ Roll n symbol dice and add the results. Returns a Tables.jl compliant struct
 # Example 
     roll(1:5, dicewithsymbols) 
 """
-function roll(n::Union{Int,OrdinalRange},dice::SymbolDice;name::String=dice.name) 
-
-   A = Array{Int64,2}(undef,0,length(dice.symbols)+2)
-
-   for nᵢ in n
-   # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
-
-    c = multiexponents(length(dice.sidesfreq),nᵢ)  # multiexponents return an iterable
+function roll(n::Union{Int,UnitRange{Int}},dice::SymbolDice;name::String=dice.name) 
     
-    allcomb = dice.sides^nᵢ # All possible combinations for the given number of sides and dice
+    minimum(n)<=0 && return error("Must roll a positive number of dice")
 
-    r= Array{Any}(undef,length(c), 2)
+    A = Array{Int64,2}(undef,0,length(dice.symbols)+2)
+
+    for nᵢ in n
+    # 1. Calculate the probability each combination o sides. First taking into account ordenations of sides and secondly considering repeated sides on a die
+
+        c = multiexponents(length(dice.sidesfreq),nᵢ)  # multiexponents return an iterable
+    
+        allcomb = dice.sides^nᵢ # All possible combinations for the given number of sides and dice
+
+        r= Array{Any}(undef,length(c), 2)
 
         for (j,sidecombs) in enumerate(c)
 
@@ -62,12 +64,12 @@ reroll the dice with specific results
     reroll(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
 #TODO Complejo: incluir una regla para reroll e.j. :Blank if :Harm == 0 ¬:Bread ==0
-function reroll(iter::Union{Int,OrdinalRange},dice::SymbolDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
+function reroll(iter::Union{Int,UnitRange{Int}},dice::SymbolDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
 
     (typeof(reroll) == Symbol) && (reroll = [reroll])
 
-    roll = resultsprobabilities(iter,dice,name) #First roll
-    roll2 = resultsprobabilities(range(0,stop= maximum(iter)),dice,"Reroll") # Base for 2nd roll
+    roll = roll(iter,dice,name) #First roll
+    roll2 = roll(range(0,stop= maximum(iter)),dice,"Reroll") # Base for 2nd roll
     
     l₁ = size(data(roll),1) # Length of each Table
     l₂ = size(data(roll2),1)
