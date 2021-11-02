@@ -27,7 +27,7 @@ using .DicePools
     2.- [DONE]Also, +(DiceProbabilities,DiceProbabilities...), +(StandardDice, Int), *(Int,Dice)
     3.- [DONE] macro @roll 3d6+1 -> Not useful if 1 & 2 work
     4.- [DONE] Solve sorting results when substracting dice
-    5.- Solve minus dice (-3d6)
+    5.- Solve minus dice (-3d6) [DONE with StandardDice]
     6.- reroll numeric
     7.- exploding dice (~ reroll 'x' times)
     8.- hybrid dice (e.g. The one ring: d10 plus symbols)

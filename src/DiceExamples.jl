@@ -6,7 +6,7 @@ d10 = StandardDice(10)
 d12 = StandardDice(12)
 d20 = StandardDice(20)
 d100 = StandardDice(100)
-fudge = StandardDice(3,-1:1,"fudge")
+fudge = CustomDice(3,-1:1,"fudge")
 
 # Year-Zero Engine Dice
 MY0_Skill = SymbolDice([["Success"],["Blank"]],[1,5],"MY0_Skill")
