@@ -6,7 +6,9 @@ A small example
 ```
     eights = roll(1:3,d8)
     special = roll(1:4,symboldice)
-    results = pool(eigth,special)
+    results = pool(eigths,special)
+    
+    PrettyTable(results
     DataFrame(results)
     CSV.write(results)
 ```
