@@ -56,8 +56,6 @@ function roll(n::Union{Int,UnitRange{Int}},dice::StandardDice,mod::Int=0;name::S
 end
 
 function roll(n::Union{Int,UnitRange{Int}},dice::CustomDice,mod::Int=0;name::String=dice.name) # Method for non-standard numeric dice. Calculation is done recursively
-  
-    #minimum(n)<=0 && return error("Must roll a positive number of dice")
 
     A = Array{Real,2}(undef,0,3) 
 
@@ -72,15 +70,14 @@ function roll(n::Union{Int,UnitRange{Int}},dice::CustomDice,mod::Int=0;name::Str
             neg = false
         end
 
-        r,p = recursiveroll_sum(nᵢ,dice)
-        (mod != 0) && (r = r.+mod)
+    r,p = recursiveroll_sum(nᵢ,dice)
+    (mod != 0) && (r = r.+mod)
 
-    if neg
-    # TODO sort results
-    A = vcat(A,hcat(fill(-nᵢ,length(r)),-r,p))
-    else
-    A = vcat(A,hcat(fill(nᵢ,length(r)),r,p))
-    end
+        if neg
+        A = vcat(A,hcat(fill(-nᵢ,length(r)),sortslices([-r p],dims=1,by= x-> x[end-1])))
+        else
+        A = vcat(A,hcat(fill(nᵢ,length(r)),r,p))
+        end
     end
 
     name = (mod==0) ? name : string(n,name,"+",mod)

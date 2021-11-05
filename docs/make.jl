@@ -9,3 +9,10 @@ makedocs(
             "Rolling" => ["numeric.md", "symbol.md", "pool.md"],
             "Dice" => "dicetypes.md", "Description" => "codedescription.md"]
 )
+
+#= ToDO 
+deploydocs(
+    repo = "github.com/sylvaticus/MyAwesomePackage.jl.git",
+    devbranch = "main"
+)
+=#

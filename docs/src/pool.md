@@ -1,6 +1,6 @@
 # Pooling Dice
 
-Pool function allows to mix one or more results 
+Pool function allows to combine one or more results 
 
 ```@docs
 pool
