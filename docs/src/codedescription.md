@@ -7,7 +7,7 @@ This section describes the general structure of the code and main design choices
 DicePools is organized in the following files:
 
 - DiceTypes.jl: includes types for dice and their hierarchy 
-- NumericDice.jl: several fucntions for calculating results on rolls with numeric dice (add, roll under, beat target...)
+- NumericDice.jl: functions for calculating results on rolls with numeric dice. Add results and other mechanics (roll under, beat target...)
 - SymbolDice.jl: results and probabilites for Symbol dice
 - DiceExamples.jl: definitions of common (and not-so common) types of dice
 - Pool.jl: methods for pooling dice together. Numeric, Symbol or both
@@ -16,10 +16,17 @@ DicePools is organized in the following files:
 
 ## Numeric dice
 
-Numericdice.jl  defines a function roll with two methods for calculating the propability of a result in the following cases
+Numericdice.jl defines a function roll with two methods for calculating the propability of a result in the following cases
 1.  Sum of results of standard dice using combinatorics
 2.  Sum of results of custom numeric dice
 
 There is algo a customroll method for applying a function to the results of a numeric dice. This method is used in functions that implement specific mechanics such as 'roll under', 'take mid', 'beat target', 'drop lowest'...
 
 ## Symbol dice
+
+SymbolDice.jl calculates the probability for dice with symbols instead of numbers on their sides. 
+Each combination of symbols are given a probability.
+
+## Pool
+
+Pool.jl includes a function for combining the results of previous rolls. Either numberic or symbol dice

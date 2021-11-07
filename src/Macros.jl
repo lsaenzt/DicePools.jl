@@ -1,4 +1,4 @@
-# Macro for standard dice roll e.g. 3d10+3.
+# Macro for standard dice roll e.g. 3d10+3. -> Overloading Base arithmetic operators is much simper
 macro roll(w)
     # split("3d4+2d6-1",r"[+-]")
     quote 
@@ -23,4 +23,3 @@ macro dicename(d) #TODO: investigar macros para utilizar en argumento de "result
         $(string(d))
     end
 end
-

@@ -34,7 +34,7 @@ struct SymbolDice <: Dice
     name::String
 end
 
-"User 'friendly' Constructor for Symbol dice"
+"User 'friendly' constructor for Symbol dice"
 function SymbolDice(sides::Array,freq::Array=[],name::String="Dice")
 
     (freq==[]) && (freq = ones(length(sides))) #If f is empty then each results happens once in the die
@@ -84,3 +84,5 @@ struct DiceProbabilities <: Tables.AbstractColumns
     data::Array{Real}
     lookup::Dict{Symbol, Int}
 end
+
+Base.show(io::IO dp::DiceProbabilities) = print(io,pretty_table(dp))

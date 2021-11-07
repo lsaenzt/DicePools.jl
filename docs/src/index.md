@@ -2,7 +2,9 @@
 
 ## Summary
 
-DicePools generates Tables.jl compliant output with the results of rolling dice under various rules. Dice can be both numeric or with symbols and combining both is also possible.
+DicePools calculates the probability of results of rolling a number of dice. Dice can be both numeric or with symbols and combining both is also possible.
+
+Results is Tables.jl compliant and can be easily converted to DataFrames, CSV, PrettyTables...
 
 ### Example 
 ```
@@ -18,7 +20,7 @@ DicePools generates Tables.jl compliant output with the results of rolling dice 
 ```
 
 ### Note
-This package is being developed for Julia learning and practicing. Pending tasks:
+Pending tasks:
     - explode dice
     - reroll numeric dice
 

@@ -1,14 +1,20 @@
 # DicePools
 
-DicePools generates a Table.jl compliant output with the results of rolling dice. Dice can be both numeric or with symbols and combining both is also possible.
+## Summary
 
-A small example 
+DicePools calculates the probability of results of rolling a number of dice. Dice can be both numeric or with symbols and combining both is also possible.
+
+Results is Tables.jl compliant and can be easily converted to DataFrames, CSV, PrettyTables...
+
+### Example 
 ```
-    eights = roll(1:3,d8)
-    special = roll(1:4,symboldice)
+    eigths = roll(1:3,d8)
+    symbols = SymbolDice([["Success"],["Blank"]],[1,5],"Symbol") # 1 success and 5 blanks
+    special = roll(1:4,symbols)
     results = pool(eigths,special)
-    
-    PrettyTable(results
+
+    using PrettyTables, DataFrames, CSV
+    pretty_table(results)
     DataFrame(results)
     CSV.write(results)
 ```

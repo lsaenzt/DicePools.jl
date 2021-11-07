@@ -1,4 +1,3 @@
-# Note: Usage of Real for getting Int for the number of dice and results and float for probabilities
 #------------------------------------------------------------------------------------------------------
 # roll functions
 #------------------------------------------------------------------------------------------------------
@@ -9,11 +8,11 @@ mod::Int is a modifier to apply to each result
 
 # Example    
     roll(3,d6,+2)
-    roll(4, custom;name="foo")
+    roll(3,custom,"fudge")
 """ 
 function roll(n::Union{Int,UnitRange{Int}},dice::StandardDice,mod::Int=0;name::String=dice.name) # Fast method for StandardDice
 
-    A = Array{Real,2}(undef,0,3) 
+    A = Array{Union{Int, Float64},2}(undef,0,3) 
     s = dice.sides
    
     for nᵢ in n  # n number of dice to roll
@@ -31,7 +30,7 @@ function roll(n::Union{Int,UnitRange{Int}},dice::StandardDice,mod::Int=0;name::S
      allcomb = BigInt(s)^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
 
      r = zeros(Int,nᵢ*s-nᵢ+1) # Array length is max result minus min result
-     f = zeros(Real,nᵢ*s-nᵢ+1)
+     f = zeros(Float64,nᵢ*s-nᵢ+1)
      
         for p in nᵢ:s*nᵢ # Computes 'c' as described in https://mathworld.wolfram.com/Dice.html
             c=0
@@ -48,7 +47,9 @@ function roll(n::Union{Int,UnitRange{Int}},dice::StandardDice,mod::Int=0;name::S
         A = vcat(A,hcat(fill(nᵢ,nᵢ*s-nᵢ+1),r,f))
         end
     end
-    
+
+    A[:,1:end-1]=Int.(A[:,1:end-1]) # Just for aesthetics. Number of dice and results as Int
+
     # Creates a DiceProbabilities struct that is Tables.jl compliant
     name = (mod==0) ? name : string(n,dice.name,"+",mod)
     cols = [Symbol(name),:Result,:Probability]   
@@ -57,7 +58,7 @@ end
 
 function roll(n::Union{Int,UnitRange{Int}},dice::CustomDice,mod::Int=0;name::String=dice.name) # Method for non-standard numeric dice. Calculation is done recursively
 
-    A = Array{Real,2}(undef,0,3) 
+    A = Array{Union{Int, Float64},2}(undef,0,3) 
 
     for nᵢ in n
 
@@ -79,6 +80,7 @@ function roll(n::Union{Int,UnitRange{Int}},dice::CustomDice,mod::Int=0;name::Str
         A = vcat(A,hcat(fill(nᵢ,length(r)),r,p))
         end
     end
+    A[:,1:end-1]=Int.(A[:,1:end-1]) # Just for aesthetics. Number of dice and results as Int
 
     name = (mod==0) ? name : string(n,name,"+",mod)
     cols = [Symbol(name),:Result,:Probability]   
@@ -113,7 +115,7 @@ end
     end
 
 Applies a function to each individual result. 
-Calculate every single possible result. It takes time if the number of possibilities is high.
+Calculates every single possible result. It takes time if the number of possibilities is high.
 
 # Example. Drop lowest
     customroll(3,d6) do r
@@ -122,16 +124,16 @@ Calculate every single possible result. It takes time if the number of possibili
 """
 function customroll(f::Function,n::Union{Int,UnitRange{Int}},dice::NumericDice;name::String="Dice") 
 
-    # minimum(n)<=0 && return error("Must roll a positive number of dice")
+    minimum(n)<=0 && return error("Must roll a positive number of dice")
 
-    A = Array{Real,2}(undef,0,3)
+    A = Array{Union{Int, Float64},2}(undef,0,3)
     idx = 1:dice.sides # Combinations on idx deals with repeated values in a Customdice
 
     for nᵢ in n
     # 1. Calculate the probability each combination of sides. First taking into account combinations of results and secondly considering repeated sides on a die
     allcomb = dice.sides^nᵢ # All possible combinations for the given number of sides and dice
     c = with_replacement_combinations(idx,nᵢ)
-    r = OrderedDict{Int, Real}()
+    r = OrderedDict{Int, Float64}()
 
         for cᵢ in c
             rep = count_repeated(cᵢ)    # This allows faster splat in the next line       
@@ -140,11 +142,14 @@ function customroll(f::Function,n::Union{Int,UnitRange{Int}},dice::NumericDice;n
             @inbounds s = f(@view dice.results[cᵢ]) # Function applied to the individual results
             r[s] = get(r,s,0) + prob
         end
+
     sort!(r)
 
     # 2. Concatenate results
     A = vcat(A,hcat(fill(nᵢ,length(r)),collect(keys(r)),collect(values(r))))
     end
+
+    A[:,1:end-1]=Int.(A[:,1:end-1]) # Just for aesthetics. Mumber of dice and results as Int
 
     # 3. Creates a DiceProbabilties Struct
     cols = [Symbol(name),:Result,:Probability]
@@ -166,106 +171,8 @@ function count_repeated(a::Array)
     digits(i) # Descomposición de número
 end
 
-#------------------------------------------------------------------------------------------------------
-# roll functions
-#------------------------------------------------------------------------------------------------------
-# Nota: Las funciones siguientes no se pueden llamar "roll". El multiple dispatch toma sólo argumentos posicionales y se confunde entre estas dos y la de antes
-"""
-    drop(n,dice,mod;[droplowest=0],[drophighest=0],[name])
-
-Drop lowest or highest results
-
-# Arguments
- - droplowest::Int' and/or 'drophighest::Int': number of dice to be dropped
-
-# Example
-    drop(5,d8; droplowest=2)
-""" 
-function drop(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;droplowest=0,drophighest=0,name="Dice") 
-
-    (droplowest+drophighest)>n && return error("More dice dropped than the number of dice rolled")
-
-    customroll(n,dice,name) do r
-        sum(r[begin+droplowest:end-drophighest]) + mod
-    end
-end
-
-"""
-    takemid(n,dice,[mod=0];[mid=1],[name])
-
-Sum mid dice results. The number of mid dice to sum is set by the 'mid::Int' keyword
-""" 
-function takemid(n::Union{Int,OrdinalRange},dice::NumericDice,mod::Int=0;mid=1,name="Dice")
-    
-    mid>n && return error("Mid cannot be higher than the number of dice")
-
-    l = n - mid
-    drop = div(l,2)
-    
-    customroll(n,dice,name) do r
-        sum(r[begin+drop:end-drop-isodd(l)]) + mod
-    end
-end
-
-"""
-    beattarget(n,dice;target=maximum(dice.results),equal=true, [name])
-
-Beating a target number with n dice. If equal is set to true, matching the target counts as success
-""" 
-function beattarget(n,dice::NumericDice;target::Int=maximum(dice.results),name=dice.name, equal=true) 
-    equal ? (f = ≥) : (f = >) # if equal is true use equal or greater, else use greater
-    dice = CustomDice([f(i,target) ? 1 : 0 for i in dice.results],name) # Sides that count as 1 success
-    roll(n,dice)
-end
-
-"""
-    rollunder(n,dice;target=maximum(dice.results),equal=true, [name])
-
-Roll below a target number with n dice. If equal is set to true, matching the target counts as success
-""" 
-function rollunder(n,dice::NumericDice;target::Int=maximum(dice.results),name=dice.name, equal=true) 
-    equal ? (f = ≤) : (f = <) # if equal is true use equal or less, else use less
-    dice = CustomDice([f(i,target) ? 1 : 0 for i in dice.results],name) # Sides that count as 1 success
-    roll(n,dice)
-end
-
-
-function reroll(n::Union{Int,UnitRange{Int}},dice::CustomDice,mod::Int=0;reroll::Int, name::String=dice.name) end
-
-function explode() end
-
-"""
-Single random result of die roll
-"""
-function singleroll(n::Int,d::NumericDice,mod::Int=0)
-    s=0
-    for i in 1:n
-        s = s + rand(d.results)
-    end
-    return s+mod
-end
-
-"""
-Sample of 'rep' rolls of an 'n' dice of type 'd' applying 'f' to each result
-"""
-function sampleroll(f::Function, n::Int, d::NumericDice, rep::Int)
-    res = Vector{Int}(undef,rep)
-    for i in 1:rep
-        r = Vector{Int}(undef,d.sides)
-        for j in 1:n
-            r[j] = rand(d.results)
-        end
-        res[i] = f(r)
-    end
-    ur = sort(unique(res))
-    freq = [sum([c == x for c in res]) for x in ur] 
-    freq = freq./length(res).*100
-
-    return [ur freq]
-end
-
 #---------------------------------------------------------------------------------------------------
-# Methods for Julia.Base arithmetic functions with Dice
+# Overloading of Julia.Base arithmetic functions
 #---------------------------------------------------------------------------------------------------
 import Base.*, Base.+, Base.-
 

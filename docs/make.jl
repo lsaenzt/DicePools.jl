@@ -12,7 +12,7 @@ makedocs(
 
 #= ToDO 
 deploydocs(
-    repo = "github.com/sylvaticus/MyAwesomePackage.jl.git",
+    repo = "github.com/lsaenzt/DicePools.jl.git",
     devbranch = "main"
 )
 =#
