@@ -176,7 +176,7 @@ end
 #---------------------------------------------------------------------------------------------------
 import Base.*, Base.+, Base.-
 
-*(n::Int, d::Dice) = roll(n,d)
+*(n::Union{Int,UnitRange{Int}}, d::Dice) = roll(n,d)
 
 +(a::DiceProbabilities,b::DiceProbabilities,c::DiceProbabilities...) = pool(a,b,c...)
 

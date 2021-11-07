@@ -12,7 +12,7 @@ setprecision(32)
 
 include("DiceTypes.jl")
 include("TablesInterface.jl")
-include("pool.jl")
+include("Pool.jl")
 include("SymbolDice.jl")
 include("NumericDice.jl")
 include("Mechanics.jl")
