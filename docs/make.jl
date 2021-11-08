@@ -10,9 +10,7 @@ makedocs(
             "Dice" => "dicetypes.md", "Description" => "codedescription.md"]
 )
 
-#= ToDO 
 deploydocs(
     repo = "github.com/lsaenzt/DicePools.jl.git",
     devbranch = "main"
 )
-=#

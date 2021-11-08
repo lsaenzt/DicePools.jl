@@ -25,7 +25,7 @@ CustomDice(r::Vector{Int}) = CustomDice(length(r),r,"Dice")
 CustomDice(r::Vector{Int},name::String) = CustomDice(length(r),r,name)
 StandardDice(s::Int) = StandardDice(s,1:s,string("d",s))
 
-"Symbol dice produce descriptive results that are combined"
+"Symbol dice use symbols with a specific meaning instead of numbers"
 struct SymbolDice <: Dice 
     sides::Int #e.g. 12
     sidesfreq::Vector{Int} #[1,2,2,1,3,2,1] # How many times a specific side is repeated in the die. The order must match "symbolsinside"
@@ -37,7 +37,7 @@ end
 "User 'friendly' constructor for Symbol dice"
 function SymbolDice(sides::Array,freq::Array=[],name::String="Dice")
 
-    (freq==[]) && (freq = ones(length(sides))) #If f is empty then each results happens once in the die
+    (freq==[]) && (freq = ones(length(sides))) #If f is empty then each result happens once in the die
     (sum(freq) < length(sides)) && error("More results than sides in the die") #El vector rep contiene cuantas veces se repita cada resultado y debe ser igual a las caras
     
     # Unify repeated sides

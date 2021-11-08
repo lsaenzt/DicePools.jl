@@ -63,7 +63,7 @@ reroll the dice with specific results
 
     reroll(1:3, MY0_Skill, :Blank,"Push_Skill")
 """
-#TODO Complejo: incluir una regla para reroll e.j. :Blank if :Harm == 0 ¬:Bread ==0
+#TODO More complex rules for rerolling
 function reroll(iter::Union{Int,UnitRange{Int}},dice::SymbolDice,reroll::Union{Symbol,Array{Symbol}}, name::String="Dice")
 
     (typeof(reroll) == Symbol) && (reroll = [reroll])
@@ -77,7 +77,7 @@ function reroll(iter::Union{Int,UnitRange{Int}},dice::SymbolDice,reroll::Union{S
 
     w = size(data(roll),2) # Width for both roll and reroll
 
-    tempr = Array{Real}(undef,L,2w) #Num of data columns is the total
+    tempr = Array{Real}(undef,L,2w) # Num of data columns is the total
         
     # Main table with the results of the roll combined with itself
     tempr[:,1:w] = repeat(data(roll),outer=(l₂,1),inner=(1,1))

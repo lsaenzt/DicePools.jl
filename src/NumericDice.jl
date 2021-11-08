@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------------------------------
-# roll functions
+# Basic roll functions
 #------------------------------------------------------------------------------------------------------
 """
     roll(n,dice,mod;[name=dice.name])
@@ -149,7 +149,7 @@ function customroll(f::Function,n::Union{Int,UnitRange{Int}},dice::NumericDice;n
     A = vcat(A,hcat(fill(nᵢ,length(r)),collect(keys(r)),collect(values(r))))
     end
 
-    A[:,1:end-1]=Int.(A[:,1:end-1]) # Just for aesthetics. Mumber of dice and results as Int
+    A[:,1:end-1]=Int.(A[:,1:end-1]) # Just for aesthetics. Number of dice and results as Int
 
     # 3. Creates a DiceProbabilties Struct
     cols = [Symbol(name),:Result,:Probability]
@@ -181,20 +181,20 @@ import Base.*, Base.+, Base.-
 +(a::DiceProbabilities,b::DiceProbabilities,c::DiceProbabilities...) = pool(a,b,c...)
 
 function +(a::DiceProbabilities,b::Int)
-    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
     data(a)[:,end-1] = data(a)[:,end-1] .+ b
     a
 end
 
 function -(a::DiceProbabilities,b::Int)
-    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
     data(a)[:,end-1] = data(a)[:,end-1] .- b
     a
 end
 
 function -(a::DiceProbabilities,b::DiceProbabilities)
-    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
-    (length(headers(b)) - dicenamecols(b)) > 2 && return error("Non-numeric die with more than 1 results column") # If more thna one column with results it is not possible to apply a modifier
+    (length(headers(a)) - dicenamecols(a)) > 2 && return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
+    (length(headers(b)) - dicenamecols(b)) > 2 && return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
     
     # Modifications for the 'negative' die
     headers(b)[1] = Symbol("-",headers(b)[1]) # Die name with a minus
