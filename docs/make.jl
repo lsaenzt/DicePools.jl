@@ -1,4 +1,4 @@
-using Documenter, DicePools
+using Documenter, .DicePools
 
 # Press Alt+Enter on VSCode
 makedocs(
