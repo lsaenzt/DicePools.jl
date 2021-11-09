@@ -106,7 +106,6 @@ git-tree-sha1 = "438d35d2d95ae2c5e8780b330592b6de8494e779"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "2.0.3"
 
-<<<<<<< HEAD
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
@@ -117,8 +116,6 @@ git-tree-sha1 = "a193d6ad9c45ada72c14b731a318bedd3c2f00cf"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
 version = "1.3.0"
 
-=======
->>>>>>> a2dca82b41555f515d16fc4687b499e21dce8e4c
 [[PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
 git-tree-sha1 = "69fd065725ee69950f3f58eceb6d144ce32d627d"
@@ -167,7 +164,6 @@ version = "1.5.2"
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-<<<<<<< HEAD
 [[UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -186,7 +182,3 @@ uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-=======
-[[Unicode]]
-uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
->>>>>>> a2dca82b41555f515d16fc4687b499e21dce8e4c
