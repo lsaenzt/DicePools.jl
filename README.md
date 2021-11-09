@@ -7,7 +7,7 @@ DicePools calculates the probability of results of rolling a number of dice. Dic
 Results is Tables.jl compliant and can be easily converted to DataFrames, CSV, PrettyTables...
 
 ### Example 
-```
+```julia
     eigths = roll(1:3,d8)
     symbols = SymbolDice([["Success"],["Blank"]],[1,5],"Symbol") # 1 success and 5 blanks
     special = roll(1:4,symbols)
