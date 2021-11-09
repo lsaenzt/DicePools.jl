@@ -6,9 +6,11 @@
 
 mod::Int is a modifier to apply to each result
 
-# Example    
+# Example
+```julia  
     roll(3,d6,+2)
     roll(3,custom,"fudge")
+```
 """ 
 function roll(n::Union{Int,UnitRange{Int}},dice::StandardDice,mod::Int=0;name::String=dice.name) # Fast method for StandardDice
 
@@ -118,9 +120,11 @@ Applies a function to each individual result.
 Calculates every single possible result. It takes time if the number of possibilities is high.
 
 # Example. Drop lowest
+```julia  
     customroll(3,d6) do r
         sum(r[2:end])
     end
+```
 """
 function customroll(f::Function,n::Union{Int,UnitRange{Int}},dice::NumericDice;name::String="Dice") 
 

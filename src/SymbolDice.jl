@@ -8,7 +8,9 @@ Roll n symbol dice and add the results. Returns a Tables.jl compliant struct
     - dice::SymbolDice -> an already defined die 
 
 # Example 
+'''julia  
     roll(1:5, dicewithsymbols) 
+'''
 """
 function roll(n::Union{Int,UnitRange{Int}},dice::SymbolDice;name::String=dice.name) 
     
