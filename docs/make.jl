@@ -12,5 +12,5 @@ makedocs(
 
 deploydocs(
     repo = "github.com/lsaenzt/DicePools.jl.git",
-    devbranch = "main"
+    devbranch = "master"
 )
