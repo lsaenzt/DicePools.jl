@@ -64,9 +64,9 @@ chance = sort!(combine(groupby(tdf,[:Conan_Dmg,:Hit]),:Probability => sum => :Pr
 
 # MY0
 
-tdf = DicePools.roll(1:15,MY0_Attr)|> DataFrame
+tdf = DicePools.roll(1:15,MY0_Attr)|> DataFrame;
 
-psum = combine(groupby(tdf,:MY0_Attr),:Probability => sum)
+psum = combine(groupby(tdf,:MY0_Attr),:Probability => sum);
 
 @test unique(round.(psum[:,2], digits=2)) == [100.0]
 

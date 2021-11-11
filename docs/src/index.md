@@ -21,7 +21,7 @@ Results is Tables.jl compliant and can be easily converted to DataFrames, CSV, P
 
 ### Output 
 
-DicePools generates a table with the following dimensions
+DicePools generates a table with one row for each possible result and the following dimensions:
 
 - Dice: a column with the numbers of dice in the pool. A pool of 2D6 will have a "2" in this column. If rolling several pools (e.g. 1:3) the output shows numbers 1,2,3. To see the results of one the pools (e.g. 3d6), you should filter this column by "3·
 

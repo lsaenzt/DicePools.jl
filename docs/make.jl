@@ -1,6 +1,5 @@
 using Documenter, DicePools
 
-# Press Alt+Enter on VSCode
 makedocs(
     modules = [DicePools],
     sitename = "DicePools.jl",
