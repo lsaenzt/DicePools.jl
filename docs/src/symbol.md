@@ -1,5 +1,5 @@
 # Symbol Dice
 
 ```@docs
-roll
+roll(n::Union{Int,UnitRange{Int}},dice::SymbolDice;name::String=dice.name)
 ```

@@ -7,7 +7,7 @@ makedocs(
     format = Documenter.HTML(),
     pages = ["Introduction" => "index.md",
             "Rolling" => ["numeric.md", "symbol.md", "pool.md"],
-            "Dice" => "dicetypes.md", "Description" => "codedescription.md"]
+            "Dice" => "dicetypes.md", "Internals" => "codedescription.md"]
 )
 
 deploydocs(

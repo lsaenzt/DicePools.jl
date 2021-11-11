@@ -1,7 +1,7 @@
 # Numeric Dice
 
 ```@docs
-roll
+roll(n::Union{Int,UnitRange{Int}},dice::StandardDice,mod::Int=0;name::String=dice.name)
 customroll
 drop
 beattarget
