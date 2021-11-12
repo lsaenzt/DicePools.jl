@@ -17,5 +17,5 @@ jobs:
           version: '1.6'
       - name: Install dependencies
         run: julia --project=test/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      - name: Build and deploy
-       run: julia --project=test/ test/testset.jl
+      - name: Run tests
+        run: julia --project=test/ test/testset.jl
