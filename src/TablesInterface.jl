@@ -1,4 +1,4 @@
-export headers,data,lookup,dicenamecols # ¿debería exportarse esto?
+export headers, data, lookup, dicenamecols # ¿debería exportarse esto?
 
 # Implementing diceprobabilities as Tables interface compliant for direct reading to DataFrames, CSV...
 
@@ -16,6 +16,6 @@ Tables.columnaccess(::Type{<:DiceProbabilities}) = true
 Tables.columns(dp::DiceProbabilities) = dp
 
 # required Tables.AbstractColumns object methods
-Tables.getcolumn(dp::DiceProbabilities, nm::Symbol) = data(dp)[:,lookup(dp)[nm]]
-Tables.getcolumn(dp::DiceProbabilities, i::Int) = data(dp)[:,i]
+Tables.getcolumn(dp::DiceProbabilities, nm::Symbol) = data(dp)[:, lookup(dp)[nm]]
+Tables.getcolumn(dp::DiceProbabilities, i::Int) = data(dp)[:, i]
 Tables.columnnames(dp::DiceProbabilities) = headers(dp)
