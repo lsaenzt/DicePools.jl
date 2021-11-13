@@ -18,4 +18,6 @@ jobs:
       - name: Install dependencies
         run: julia --project=test/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Run tests
-        run: julia --project=test/ test/testset.jl
+        run: julia --project=test/ test/runtests.jl
+        shell: julia --color=yes {0}
+
