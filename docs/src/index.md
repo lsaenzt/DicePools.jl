@@ -1,7 +1,5 @@
 # DicePools
 
-## Summary
-
 DicePools calculates the probability of each possible result when rolling a number of dice. Dice can be both numeric or with symbols and combining both is also possible.
 
 Results is Tables.jl compliant and can be easily converted to DataFrames, CSV, PrettyTables...

@@ -86,5 +86,3 @@ struct DiceProbabilities <: Tables.AbstractColumns
     data::Array{Real}
     lookup::Dict{Symbol,Int}
 end
-
-Base.show(io::IO, dp::DiceProbabilities) = pretty_table(dp)

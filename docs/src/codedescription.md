@@ -1,7 +1,3 @@
-## Description
-
-This section describes the general structure of the code and main design choices.
-
 ## Overview
 
 DicePools is organized in the following files:
