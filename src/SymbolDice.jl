@@ -50,9 +50,9 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::SymbolDice; name::String=dice.
         A = vcat(A, hcat(fill(nᵢ, size(a, 1)), a, r[:, 2]))
     end #for
 
-    # 3. Creates a DiceProbabilities struct that is Tables.jl compliant
+    # 3. Creates a DicePool struct that is Tables.jl compliant
     cols = [Symbol(name), dice.symbols..., :Probability]
-    return DicePools.DiceProbabilities(cols, 1, A,
+    return DicePools.DicePool(cols, 1, A,
                                        Dict([j => i for (i, j) in enumerate(cols)]))
 end
 """
@@ -101,6 +101,6 @@ function reroll(iter::Union{Int,UnitRange{Int}}, dice::SymbolDice,
 
     cols = [colnames..., :Probability] # Adds :Probability to column names
 
-    return DicePools.DiceProbabilities(c, 2, r,
+    return DicePools.DicePool(c, 2, r,
                                        Dict([j => i for (i, j) in enumerate(cols)]))
 end

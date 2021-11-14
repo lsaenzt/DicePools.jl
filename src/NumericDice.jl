@@ -54,10 +54,10 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
 
     A[:, 1:(end - 1)] = Int.(A[:, 1:(end - 1)]) # Just for aesthetics. Number of dice and results as Int
 
-    # Creates a DiceProbabilities struct that is Tables.jl compliant
+    # Creates a DicePool struct that is Tables.jl compliant
     name = (mod == 0) ? name : string(n, dice.name, "+", mod)
     cols = [Symbol(name), :Result, :Probability]
-    return DicePools.DiceProbabilities(cols, 1, A,
+    return DicePools.DicePool(cols, 1, A,
                                        Dict([j => i for (i, j) in enumerate(cols)])) # Struct Tables.jl compliant
 end
 
@@ -90,7 +90,7 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::CustomDice, mod::Int=0;
 
     name = (mod == 0) ? name : string(n, name, "+", mod)
     cols = [Symbol(name), :Result, :Probability]
-    return DicePools.DiceProbabilities(cols, 1, A,
+    return DicePools.DicePool(cols, 1, A,
                                        Dict([j => i for (i, j) in enumerate(cols)]))
 end
 
@@ -160,7 +160,7 @@ function customroll(f::Function, n::Union{Int,UnitRange{Int}}, dice::NumericDice
 
     # 3. Creates a DiceProbabilties Struct
     cols = [Symbol(name), :Result, :Probability]
-    return DicePools.DiceProbabilities(cols, 1, A,
+    return DicePools.DicePool(cols, 1, A,
                                        Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
 end
 
@@ -186,23 +186,23 @@ import Base.*, Base.+, Base.-
 
 *(n::Union{Int,UnitRange{Int}}, d::Dice) = roll(n, d)
 
-+(a::DiceProbabilities, b::DiceProbabilities, c::DiceProbabilities...) = pool(a, b, c...)
++(a::DicePool, b::DicePool, c::DicePool...) = pool(a, b, c...)
 
-function +(a::DiceProbabilities, b::Int)
+function +(a::DicePool, b::Int)
     (length(headers(a)) - dicenamecols(a)) > 2 &&
         return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
     data(a)[:, end - 1] = data(a)[:, end - 1] .+ b
     return a
 end
 
-function -(a::DiceProbabilities, b::Int)
+function -(a::DicePool, b::Int)
     (length(headers(a)) - dicenamecols(a)) > 2 &&
         return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
     data(a)[:, end - 1] = data(a)[:, end - 1] .- b
     return a
 end
 
-function -(a::DiceProbabilities, b::DiceProbabilities)
+function -(a::DicePool, b::DicePool)
     (length(headers(a)) - dicenamecols(a)) > 2 &&
         return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
     (length(headers(b)) - dicenamecols(b)) > 2 &&
@@ -212,7 +212,7 @@ function -(a::DiceProbabilities, b::DiceProbabilities)
     headers(b)[1] = Symbol("-", headers(b)[1]) # Die name with a minus
     data(b)[:, end - 1] = data(b)[:, end - 1] .* -1 # Results negative for substracting
     # Sorting probabilities to get the results also sorted when 'pooled'
-    sorted_b = DiceProbabilities(headers(b), dicenamecols(b),
+    sorted_b = DicePool(headers(b), dicenamecols(b),
                                  sortslices(data(b); dims=1, by=x -> x[end - 1]),
                                  Dict([j => i for (i, j) in enumerate(headers(b))]))
 

@@ -5,7 +5,7 @@ Combines the results of several dice rolls into one table
 
     pool(r,t,s)
 """
-function pool(r1::DiceProbabilities, r2::DiceProbabilities, ri::DiceProbabilities...)
+function pool(r1::DicePool, r2::DicePool, ri::DicePool...)
     rs = (r1, r2, ri...)
     l = size.(data.(rs), 1)      # Length of each Table
     L = prod(l)                 # Total length of outputrs
@@ -48,7 +48,7 @@ function pool(r1::DiceProbabilities, r2::DiceProbabilities, ri::DiceProbabilitie
 
     cols = [colname..., :Probability]
 
-    return DicePools.DiceProbabilities(cols, n, collapse(r),
+    return DicePools.DicePool(cols, n, collapse(r),
                                        Dict([j => i for (i, j) in enumerate(cols)]))
 end
 

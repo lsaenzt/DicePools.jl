@@ -80,7 +80,7 @@ struct HybridDice <: Dice
 end
 
 "Tables.jl compliant Struct for storing dice probabilities results"
-struct DiceProbabilities <: Tables.AbstractColumns
+struct DicePool <: Tables.AbstractColumns
     headers::Vector{Symbol}
     dicenamecols::Int
     data::Array{Real}
