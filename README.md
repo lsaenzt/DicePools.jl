@@ -1,3 +1,4 @@
+![Test Status](https://github.com/lsaenzt/DicePools.jl/workflows/Test/badge.svg)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://lsaenzt.github.io/DicePools.jl/dev/)
 
 # DicePools
