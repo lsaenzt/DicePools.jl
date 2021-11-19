@@ -19,4 +19,4 @@ Results is Tables.jl compliant and can be easily converted to DataFrames, CSV, P
 
 ### Note
 
-DicePools has been (obviously) developed with learning purposes in mind (and for fun). It uses type hierarchies, type constructors (inner and outter), multiple dispath, do-block functions, overloading of Julia Base, BigInts, tables.jl interface implementation, recursive functions, documenter and testing suite.
+DicePools has been (obviously) developed with learning purposes in mind. And for fun... It uses type hierarchies, type constructors (inner and outter), multiple dispath, do-block functions, overloading of Julia Base, BigInts, tables.jl interface implementation, recursive functions, documenter and testing suite.
