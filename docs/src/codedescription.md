@@ -22,8 +22,8 @@ There is algo a customroll method for applying a function to the results of a nu
 ## Symbol dice
 
 SymbolDice.jl calculates the probability for dice with symbols instead of numbers on their sides. 
-Each combination of symbols are given a probability.
+Each combination of symbols is given a probability.
 
 ## Pool
 
-Pool.jl includes a function for combining the results of previous rolls. Either numberic or symbol dice
+Pool.jl includes a function for combining the results of previous rolls. Either numberic, symbol dice or both
