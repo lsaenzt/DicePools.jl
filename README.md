@@ -1,3 +1,5 @@
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://lsaenzt.github.io/DicePools/dev)
+
 # DicePools
 
 DicePools calculates each possible result of a dice pool and their probability of ocurrence. Dice can be both numeric or with symbols and combining both is also possible.
