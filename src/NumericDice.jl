@@ -119,8 +119,8 @@ end
         f(r)
     end
 
-Applies a function to each individual result. 
-Calculates every single possible result. It takes time if the number of possibilities is high.
+Applies a function to each possible result. 
+Calculates every single combination of results. It can take time if the number of possibilities is high.
 
 # Example. Drop lowest
 ```julia  
