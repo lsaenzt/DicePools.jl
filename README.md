@@ -1,5 +1,5 @@
 ![Test Status](https://github.com/lsaenzt/DicePools.jl/workflows/Tests/badge.svg)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://lsaenzt.github.io/DicePools.jl/dev/)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://lsaenzt.github.io/DicePools.jl/dev/)
 
 # DicePools
 
