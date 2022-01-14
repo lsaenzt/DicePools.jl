@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------------------------------
-# Basic roll functions
+# Basic add roll functions
 #------------------------------------------------------------------------------------------------------
 """
     roll(n,dice,mod;[name=dice.name])
@@ -177,6 +177,46 @@ function count_repeated(a::Array)
         end
     end
     return digits(i) # Descomposición de número
+end
+
+#---------------------------------------------------------------------------------------------------
+# Roll highest functions
+#---------------------------------------------------------------------------------------------------
+
+function highest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
+    name::String=dice.name)
+
+    # reference: https://rpg.stackexchange.com/questions/107775/2-dice-pools-roll-matching-highest
+    A = Array{Union{Int,Float64},2}(undef, 0, 3)
+
+    for nᵢ in n
+        if nᵢ == 0
+            continue
+        elseif nᵢ < 0 # Negative dice
+            neg = true
+            nᵢ = abs(nᵢ)
+        else
+            neg = false
+        end
+        for rᵢ in dice.results
+            p = ((rᵢ/dice.sides)^nᵢ - ((rᵢ-1)/dice.sides)^nᵢ)*100
+            if neg
+                A = vcat(A,
+                        hcat(fill(-nᵢ, length(dice.sides)),
+                            sortslices([-rᵢ p]; dims=1, by=x -> x[end - 1])))
+            else
+                A = vcat(A, hcat(fill(nᵢ, length(dice.sides)), rᵢ, p))
+            end
+        end
+    end
+
+    A[:, 1:(end - 1)] = Int.(A[:, 1:(end - 1)]) # Just for aesthetics. Number of dice and results as Int
+
+    # 3. Creates a DiceProbabilties Struct
+    cols = [Symbol(name), :Result, :Probability]
+    return DicePools.DicePool(cols, 1, A,
+                                       Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
+
 end
 
 #---------------------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 """
     pool(r1,r2,rs...)
 
-Combines the results of several dice rolls into one table. 
+Combines by adding the results of several dice rolls into one table. 
 Arguments are two or more DicePool structs.
 """
 function pool(r1::DicePool, r2::DicePool, ri::DicePool...)
