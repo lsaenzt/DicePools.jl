@@ -71,3 +71,16 @@ function collapse(d::Array{Real})
 
     return output
 end
+
+"""
+    compare(f,r1,r2)
+
+Compares the results of two dicepools 
+# Example
+```julia  
+    compare(>,highest(4d6),highest(3d6))
+```
+"""
+function compare(f::Function, r1::DicePool, r2::DicePool) #TODO
+
+end

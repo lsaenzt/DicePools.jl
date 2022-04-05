@@ -183,6 +183,14 @@ end
 # Roll highest functions
 #---------------------------------------------------------------------------------------------------
 
+"""
+highest(n,dice;[name=dice.name])
+
+# Example
+```julia  
+    highest(3,d8)
+```
+"""
 function highest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
     name::String=dice.name)
 
