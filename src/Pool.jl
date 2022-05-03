@@ -34,7 +34,7 @@ function pool(r1::DicePool, r2::DicePool, ri::DicePool...)
     for rᵢ in rs # Results later
         push!(colname, headers(rᵢ)[(dicenamecols(rᵢ) + 1):(end - 1)]...) # Rest of columns except Probability
     end
-    colname = union(colname) # Unque name columns
+    colname = union(colname) # Unique name columns
 
     # Column Consolidation
     r = Array{Real}(undef, L, length(colname) + 1) # One more columns for :Probability

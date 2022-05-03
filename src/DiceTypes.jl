@@ -53,6 +53,10 @@ Optionally, a name can be provided
 
 In this example, the die has 2 sides with one "Hit", 1 side with 2 "Hit", 3 side with "Blank", 
 1 side with 1 "Critical" and the last one with one "Fumble". The die is named "foo"
+
+Keyword argument 'negative==false' can be set to true to create a die that would render results than will be substracted 
+from other dice with the same symbols when pooled. E.g. You can simulate a pool of dice that have 'Skill dice' that provide successes 
+and 'Difficulty dice' that cancel those successes (and even reach negative success -> failure)
 """
 struct SymbolDice <: Dice
     sides::Int #e.g. 12
@@ -62,8 +66,8 @@ struct SymbolDice <: Dice
     name::String
 end
 
-"User 'friendly' constructor for Symbol dice"
-function SymbolDice(sides::Array, freq::Array=[], name::String="Dice")
+"User 'friendly' constructor for Symbol dice. Supports 'negative' symbol"
+function SymbolDice(sides::Array, freq::Array=[], name::String="Dice"; negative=false)
     (freq == []) && (freq = ones(length(sides))) #If f is empty then each result happens once in the die
     (sum(freq) < length(sides)) && error("More results than sides in the die") #El vector rep contiene cuantas veces se repita cada resultado y debe ser igual a las caras
 
@@ -89,6 +93,8 @@ function SymbolDice(sides::Array, freq::Array=[], name::String="Dice")
         end
         push!(m, temp)
     end
+    
+    (negative==true) && (m = -m)
 
     s = Symbol.(s)
     return SymbolDice(sum(p), p, s, m, name)

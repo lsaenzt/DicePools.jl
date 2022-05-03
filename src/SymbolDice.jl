@@ -46,7 +46,6 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::SymbolDice; name::String=dice.
         for k in 1:size(a, 1)
             a[k, :] = sum(r[k] .* dice.symbolsinside)
         end
-
         A = vcat(A, hcat(fill(nᵢ, size(a, 1)), a, r[:, 2]))
     end #for
 
