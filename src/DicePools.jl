@@ -19,4 +19,10 @@ include("Mechanics.jl")
 include("DiceExamples.jl")
 include("Utils.jl")
 
+let 
+    roll(1,d4)
+    highest(1,d4)
+    drop(1,d4)
+end
+
 end # module

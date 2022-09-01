@@ -18,7 +18,7 @@ function drop(n::Union{Int,OrdinalRange}, dice::NumericDice, mod::Int=0; droplow
     (droplowest + drophighest) > n &&
         return error("More dice dropped than the number of dice rolled")
 
-    customroll(n, dice, name) do r
+    customroll(n, dice, name=name) do r
         return sum(r[(begin + droplowest):(end - drophighest)]) + mod
     end
 end
@@ -35,7 +35,7 @@ function takemid(n::Union{Int,OrdinalRange}, dice::NumericDice, mod::Int=0; mid=
     l = n - mid
     drop = div(l, 2)
 
-    customroll(n, dice, name) do r
+    customroll(n, dice, name=name) do r
         return sum(r[(begin + drop):(end - drop - isodd(l))]) + mod
     end
 end
