@@ -93,8 +93,8 @@ function SymbolDice(sides::Array, freq::Array=[], name::String="Dice"; negative=
         end
         push!(m, temp)
     end
-    
-    (negative==true) && (m = -m)
+
+    (negative == true) && (m = -m)
 
     s = Symbol.(s)
     return SymbolDice(sum(p), p, s, m, name)
@@ -114,6 +114,6 @@ end
 struct DicePool <: Tables.AbstractColumns
     headers::Vector{Symbol}
     dicenamecols::Int
-    data::Array{Real}
+    data::Matrix{Float64}
     lookup::Dict{Symbol,Int}
 end

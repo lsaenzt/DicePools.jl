@@ -13,9 +13,14 @@ mod::Int is a modifier to apply to each result
 ```
 """
 function roll(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
-              name::String=dice.name)
-    A = Array{Union{Int,Float64},2}(undef, 0, 3)
+    name::String=dice.name)
     s = dice.sides
+
+    _n_iter = collect(n)
+    total_rows = sum(nᵢ == 0 ? 0 : nᵢ > 0 ? nᵢ * s - nᵢ + 1 : abs(nᵢ) * s - abs(nᵢ) + 1 for nᵢ in _n_iter)
+
+    A = Matrix{Float64}(undef, total_rows, 3)
+    curr_row = 1
 
     for nᵢ in n
         if nᵢ == 0
@@ -27,43 +32,37 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
             neg = false
         end
 
-        # Based on https://mathworld.wolfram.com/Dice.html.
-        allcomb = BigInt(s)^nᵢ # Todas las posibles combinaciones de caras que pueden salir 
-
-        r = zeros(Int, nᵢ * s - nᵢ + 1) # Array length is max result minus min result
-        f = zeros(Float64, nᵢ * s - nᵢ + 1)
-
-        for p in nᵢ:(s * nᵢ) # Computes 'c' as described in https://mathworld.wolfram.com/Dice.html
-            c = 0
-            for k in 0:floor(Int, (p - nᵢ) / s)
-                c = c +
-                    (-1)^k *
-                    binomial(BigInt(nᵢ), k) *
-                    binomial(BigInt(p - s * k - 1), nᵢ - 1)
+        dist = Float64[1.0]
+        prob_step = 1.0 / s
+        for _ in 1:nᵢ
+            next_dist = zeros(Float64, length(dist) + s - 1)
+            for j in 1:length(dist)
+                for k in 1:s
+                    next_dist[j+k-1] += dist[j] * prob_step
+                end
             end
-            r[p - nᵢ + 1] = p + mod
-            f[p - nᵢ + 1] = c / allcomb * 100
+            dist = next_dist
         end
-        # Concatenate results for each n
-        if neg
-            A = vcat(A, hcat(fill(-nᵢ, nᵢ * s - nᵢ + 1), r .- (s * nᵢ + nᵢ), f)) #Results in Standard Dice are 'symmetric'
-        else
-            A = vcat(A, hcat(fill(nᵢ, nᵢ * s - nᵢ + 1), r, f))
+
+        for (idx, prob) in enumerate(dist)
+            res_val = nᵢ + idx - 1
+            A[curr_row, 1] = neg ? -nᵢ : nᵢ
+            A[curr_row, 2] = neg ? (res_val + mod) - (s * nᵢ + nᵢ) : res_val + mod
+            A[curr_row, 3] = prob * 100.0
+            curr_row += 1
         end
     end
 
-    A[:, 1:(end - 1)] = Int.(A[:, 1:(end - 1)]) # Just for aesthetics. Number of dice and results as Int
-
     # Creates a DicePool struct that is Tables.jl compliant
     name = (mod == 0) ? name : string(n, dice.name, "+", mod)
-    cols = [Symbol(name), :Result, :Probability]
+    cols = Symbol[Symbol(name), :Result, :Probability]
     return DicePools.DicePool(cols, 1, A,
-                                       Dict([j => i for (i, j) in enumerate(cols)])) # Struct Tables.jl compliant
+        Dict([j => i for (i, j) in enumerate(cols)])) # Struct Tables.jl compliant
 end
 
 function roll(n::Union{Int,UnitRange{Int}}, dice::CustomDice, mod::Int=0;
-              name::String=dice.name)
-    A = Array{Union{Int,Float64},2}(undef, 0, 3)
+    name::String=dice.name)
+    A_parts = Matrix{Float64}[]
 
     for nᵢ in n
         if nᵢ == 0
@@ -78,20 +77,23 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::CustomDice, mod::Int=0;
         r, p = recursiveroll_sum(nᵢ, dice)
         (mod != 0) && (r = r .+ mod)
 
+        mat = Matrix{Float64}(undef, length(r), 3)
+        mat[:, 1] .= neg ? -nᵢ : nᵢ
+        mat[:, 2] .= r
+        mat[:, 3] .= p
+
         if neg
-            A = vcat(A,
-                     hcat(fill(-nᵢ, length(r)),
-                          sortslices([-r p]; dims=1, by=x -> x[end - 1])))
-        else
-            A = vcat(A, hcat(fill(nᵢ, length(r)), r, p))
+            mat = sortslices(mat; dims=1, by=x -> x[end-1])
         end
+        push!(A_parts, mat)
     end
-    A[:, 1:(end - 1)] = Int.(A[:, 1:(end - 1)]) # Just for aesthetics. Number of dice and results as Int
+
+    A = isempty(A_parts) ? Matrix{Float64}(undef, 0, 3) : reduce(vcat, A_parts)
 
     name = (mod == 0) ? name : string(n, name, "+", mod)
-    cols = [Symbol(name), :Result, :Probability]
+    cols = Symbol[Symbol(name), :Result, :Probability]
     return DicePools.DicePool(cols, 1, A,
-                                       Dict([j => i for (i, j) in enumerate(cols)]))
+        Dict([j => i for (i, j) in enumerate(cols)]))
 end
 
 function recursiveroll_sum(n, dice::NumericDice)
@@ -130,11 +132,11 @@ Calculates every single combination of results. It can take time if the number o
 ```
 """
 function customroll(f::Function, n::Union{Int,UnitRange{Int}}, dice::NumericDice;
-                    name::String="Dice")
+    name::String="Dice")
     minimum(n) <= 0 && return error("Must roll a positive number of dice")
 
-    A = Array{Union{Int,Float64},2}(undef, 0, 3)
     idx = 1:(dice.sides) # Combinations on idx deals with repeated values in a Customdice
+    A_parts = Matrix{Float64}[]
 
     for nᵢ in n
         # 1. Calculate the probability each combination of sides. First taking into account combinations of results and secondly considering repeated sides on a die
@@ -147,36 +149,41 @@ function customroll(f::Function, n::Union{Int,UnitRange{Int}}, dice::NumericDice
             reord = multinomial(rep...) # All possible dice combinatios that lead to the same result. E.g. 20 ways of getting 3 dice with one result and 3 dice with other
             prob = reord / allcomb * 100
             @inbounds s = f(@view dice.results[cᵢ]) # Function applied to the individual results
-            r[s] = get(r, s, 0) + prob
+            r[s] = get(r, s, 0.0) + prob
         end
 
         sort!(r)
 
-        # 2. Concatenate results
-        A = vcat(A, hcat(fill(nᵢ, length(r)), collect(keys(r)), collect(values(r))))
+        mat = Matrix{Float64}(undef, length(r), 3)
+        mat[:, 1] .= nᵢ
+        mat[:, 2] .= collect(keys(r))
+        mat[:, 3] .= collect(values(r))
+        push!(A_parts, mat)
     end
 
-    A[:, 1:(end - 1)] = Int.(A[:, 1:(end - 1)]) # Just for aesthetics. Number of dice and results as Int
+    A = isempty(A_parts) ? Matrix{Float64}(undef, 0, 3) : reduce(vcat, A_parts)
 
     # 3. Creates a DiceProbabilties Struct
-    cols = [Symbol(name), :Result, :Probability]
+    cols = Symbol[Symbol(name), :Result, :Probability]
     return DicePools.DicePool(cols, 1, A,
-                                       Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
+        Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
 end
 
-"Count repeated values in an ordered array" # Avoids using multiexponents(cᵢ...) in roll(f,n,dice) which is slower
-function count_repeated(a::Array)
-    i = 1
-    d = 1
-    for j in 2:length(a) # El primer bloque de repetidos en unidades, el segundo en decenas, el tercero en centenas...
-        if a[j] == a[j - 1]
-            i += d
+"Count repeated values in an ordered array"
+function count_repeated(a::AbstractVector)
+    counts = Int[]
+    isempty(a) && return counts
+    c = 1
+    @inbounds for j in 2:length(a)
+        if a[j] == a[j-1]
+            c += 1
         else
-            d *= 10
-            i += d
+            push!(counts, c)
+            c = 1
         end
     end
-    return digits(i) # Descomposición de número
+    push!(counts, c)
+    return counts
 end
 
 #---------------------------------------------------------------------------------------------------
@@ -195,7 +202,7 @@ function highest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
     name::String=dice.name)
 
     # reference: https://rpg.stackexchange.com/questions/107775/2-dice-pools-roll-matching-highest
-    A = Array{Union{Int,Float64},2}(undef, 0, 3)
+    A_parts = Matrix{Float64}[]
 
     for nᵢ in n
         if nᵢ == 0
@@ -206,24 +213,29 @@ function highest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
         else
             neg = false
         end
+
+        mat = Matrix{Float64}(undef, length(dice.results), 3)
+        idx = 1
         for rᵢ in dice.results
-            p = ((rᵢ/dice.sides)^nᵢ - ((rᵢ-1)/dice.sides)^nᵢ)*100
-            if neg
-                A = vcat(A,
-                        hcat(fill(-nᵢ, length(dice.sides)),
-                            sortslices([-rᵢ p]; dims=1, by=x -> x[end - 1])))
-            else
-                A = vcat(A, hcat(fill(nᵢ, length(dice.sides)), rᵢ, p))
-            end
+            p = ((rᵢ / dice.sides)^nᵢ - ((rᵢ - 1) / dice.sides)^nᵢ) * 100
+            mat[idx, 1] = neg ? -nᵢ : nᵢ
+            mat[idx, 2] = neg ? -rᵢ : rᵢ
+            mat[idx, 3] = p
+            idx += 1
         end
+
+        if neg
+            mat = sortslices(mat; dims=1, by=x -> x[end-1])
+        end
+        push!(A_parts, mat)
     end
 
-    A[:, 1:(end - 1)] = Int.(A[:, 1:(end - 1)]) # Just for aesthetics. Number of dice and results as Int
+    A = isempty(A_parts) ? Matrix{Float64}(undef, 0, 3) : reduce(vcat, A_parts)
 
     # 3. Creates a DiceProbabilties Struct
-    cols = [Symbol(name), :Result, :Probability]
+    cols = Symbol[Symbol(name), :Result, :Probability]
     return DicePools.DicePool(cols, 1, A,
-                                       Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
+        Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
 
 end
 
@@ -239,14 +251,14 @@ import Base.*, Base.+, Base.-
 function +(a::DicePool, b::Int)
     (length(headers(a)) - dicenamecols(a)) > 2 &&
         return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
-    data(a)[:, end - 1] = data(a)[:, end - 1] .+ b
+    data(a)[:, end-1] = data(a)[:, end-1] .+ b
     return a
 end
 
 function -(a::DicePool, b::Int)
     (length(headers(a)) - dicenamecols(a)) > 2 &&
         return error("Non-numeric die with more than 1 results column") # If more than one column with results it is not possible to apply a modifier
-    data(a)[:, end - 1] = data(a)[:, end - 1] .- b
+    data(a)[:, end-1] = data(a)[:, end-1] .- b
     return a
 end
 
@@ -258,11 +270,11 @@ function -(a::DicePool, b::DicePool)
 
     # Modifications for the 'negative' die
     headers(b)[1] = Symbol("-", headers(b)[1]) # Die name with a minus
-    data(b)[:, end - 1] = data(b)[:, end - 1] .* -1 # Results negative for substracting
+    data(b)[:, end-1] = data(b)[:, end-1] .* -1 # Results negative for substracting
     # Sorting probabilities to get the results also sorted when 'pooled'
     sorted_b = DicePool(headers(b), dicenamecols(b),
-                                 sortslices(data(b); dims=1, by=x -> x[end - 1]),
-                                 Dict([j => i for (i, j) in enumerate(headers(b))]))
+        sortslices(data(b); dims=1, by=x -> x[end-1]),
+        Dict([j => i for (i, j) in enumerate(headers(b))]))
 
     return pool(a, sorted_b)
 end
