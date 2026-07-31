@@ -36,7 +36,7 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
         prob_step = 1.0 / s
         for _ in 1:nᵢ
             next_dist = zeros(Float64, length(dist) + s - 1)
-            for j in 1:length(dist)
+            for j in eachindex(dist)
                 for k in 1:s
                     next_dist[j+k-1] += dist[j] * prob_step
                 end
@@ -174,7 +174,8 @@ function count_repeated(a::AbstractVector)
     counts = Int[]
     isempty(a) && return counts
     c = 1
-    @inbounds for j in 2:length(a)
+    @inbounds for j in eachindex(a)
+        j == 1 && continue
         if a[j] == a[j-1]
             c += 1
         else

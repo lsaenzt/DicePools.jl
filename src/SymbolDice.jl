@@ -41,7 +41,7 @@ function roll(n::Union{Int,UnitRange{Int}}, dice::SymbolDice; name::String=dice.
 
         a = zeros(Int, size(r, 1), length(dice.symbols))
 
-        for k in 1:size(a, 1)
+        for k in axes(a, 1)
             a[k, :] = sum(r[k, 1] .* dice.symbolsinside)
         end
 
