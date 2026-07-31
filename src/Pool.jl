@@ -57,7 +57,7 @@ function collapse(d::Matrix{Float64})
     groups = d[:, 1:(end-1)]
     prob = d[:, end]
 
-    unique_idxs = unique(i -> groups[i, :], 1:stack)
+    unique_idxs = unique(i -> groups[i, :], axes(groups, 1))
 
     output = Matrix{Float64}(undef, length(unique_idxs), size(d, 2))
 
