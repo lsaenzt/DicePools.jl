@@ -53,27 +53,21 @@ end
 
 "Consolidates repeated results when pooling"
 function collapse(d::Matrix{Float64})
-    # Since groups are practically integer vectors representing combinations of sums, collect unique ones.
-    groups = d[:, 1:(end-1)]
-    prob = d[:, end]
+    # Groups are practically integer vectors representing combinations of sums.
+    # An OrderedDict accumulates the probability of each one while keeping first-appearance order.
+    groups = @view d[:, 1:(end-1)]
 
-    unique_idxs = unique(i -> groups[i, :], axes(groups, 1))
-
-    output = Matrix{Float64}(undef, length(unique_idxs), size(d, 2))
-
-    # We can optimize it by using a Dict mapping the row vector to the accumulated probability.
-    acc = Dict{Vector{Float64},Float64}()
-    for i in 1:size(d, 1)
-        row_vec = @views groups[i, :]
-        acc[row_vec] = get(acc, row_vec, 0.0) + prob[i]
+    acc = OrderedDict{Vector{Float64},Float64}()
+    for i in axes(d, 1)
+        row_vec = @view groups[i, :] # Converted to a Vector key only on first insertion
+        acc[row_vec] = get(acc, row_vec, 0.0) + d[i, end]
     end
 
-    i = 1
-    for (idx, row_idx) in enumerate(unique_idxs)
-        row_vec = @views groups[row_idx, :]
-        output[i, 1:end-1] = row_vec
-        output[i, end] = acc[row_vec]
-        i += 1
+    output = Matrix{Float64}(undef, length(acc), size(d, 2))
+
+    for (i, (row_vec, p)) in enumerate(acc)
+        output[i, 1:(end-1)] = row_vec
+        output[i, end] = p
     end
 
     return output
