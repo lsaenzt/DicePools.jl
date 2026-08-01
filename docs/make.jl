@@ -6,3 +6,5 @@ makedocs(; modules=[DicePools], sitename="DicePools.jl", format=Documenter.HTML(
                 "Dice" => "dicetypes.md", "Internals" => "codedescription.md"],checkdocs=:exports)
 
 deploydocs(; repo="github.com/lsaenzt/DicePools.jl.git", devbranch="master")
+
+# Common issues: functions are not exported, docstrings without """

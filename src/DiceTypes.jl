@@ -1,4 +1,4 @@
-export SymbolDice, CustomDice, StandardDice, NumericDice
+export SymbolDice, CustomDice, StandardDice
 
 abstract type Dice end
 
