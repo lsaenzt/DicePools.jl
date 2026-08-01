@@ -220,7 +220,7 @@ function highest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
         for rᵢ in dice.results
             p = ((rᵢ / dice.sides)^nᵢ - ((rᵢ - 1) / dice.sides)^nᵢ) * 100 # Probabilidad de resultado más alto rᵢ con nᵢ dados
             mat[idx, 1] = neg ? -nᵢ : nᵢ
-            mat[idx, 2] = neg ? -rᵢ : rᵢ
+            mat[idx, 2] = mod + (neg ? -rᵢ : rᵢ)
             mat[idx, 3] = p
             idx += 1
         end
@@ -274,7 +274,7 @@ function lowest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
         for rᵢ in dice.results
             p = (((dice.sides - rᵢ + 1) / dice.sides)^nᵢ - ((dice.sides - rᵢ) / dice.sides)^nᵢ) * 100 # Probabilidad de resultado más bajo rᵢ con nᵢ dados
             mat[idx, 1] = neg ? -nᵢ : nᵢ
-            mat[idx, 2] = neg ? -rᵢ : rᵢ
+            mat[idx, 2] = mod + (neg ? -rᵢ : rᵢ)
             mat[idx, 3] = p
             idx += 1
         end
