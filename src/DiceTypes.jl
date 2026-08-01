@@ -1,7 +1,10 @@
 export SymbolDice, CustomDice, StandardDice, NumericDice
 
 abstract type Dice end
-"Numeric dice have numbers in their sides"
+
+"""
+Numeric dice have numbers in their sides
+"""
 abstract type NumericDice <: Dice end
 
 """

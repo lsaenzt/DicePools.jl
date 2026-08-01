@@ -9,4 +9,5 @@ drop
 takemid
 beattarget
 rollunder
+sampleroll
 ```
