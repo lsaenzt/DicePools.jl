@@ -49,7 +49,9 @@ function beattarget(n, dice::NumericDice; target::Int=maximum(dice.results), nam
                     equal=true)
     equal ? (f = ≥) : (f = >) # if equal is true use equal or greater, else use greater
     dice = CustomDice([f(i, target) ? 1 : 0 for i in dice.results], name) # Sides that count as 1 success
-    return roll(n, dice)
+    return roll(n, dice) 
+    # El dado generado tiene valor 0 si no cumple la condición y 1 si la cumple
+    # TODO: devolver un resultado más entendible
 end
 
 """
@@ -62,6 +64,8 @@ function rollunder(n, dice::NumericDice; target::Int=maximum(dice.results), name
     equal ? (f = ≤) : (f = <) # if equal is true use equal or less, else use less
     dice = CustomDice([f(i, target) ? 1 : 0 for i in dice.results], name) # Sides that count as 1 success
     return roll(n, dice)
+    # El dado generado tiene valor 0 si no cumple la condición y 1 si la cumple
+    # TODO: devolver un resultado más entendible
 end
 
 function reroll(n::Union{Int,UnitRange{Int}}, dice::CustomDice, mod::Int=0; reroll::Int,

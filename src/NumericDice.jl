@@ -188,7 +188,7 @@ function count_repeated(a::AbstractVector)
 end
 
 #---------------------------------------------------------------------------------------------------
-# Roll highest functions
+# Roll highest function
 #---------------------------------------------------------------------------------------------------
 
 """
@@ -218,7 +218,7 @@ function highest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
         mat = Matrix{Float64}(undef, length(dice.results), 3)
         idx = 1
         for rᵢ in dice.results
-            p = ((rᵢ / dice.sides)^nᵢ - ((rᵢ - 1) / dice.sides)^nᵢ) * 100
+            p = ((rᵢ / dice.sides)^nᵢ - ((rᵢ - 1) / dice.sides)^nᵢ) * 100 # Probabilidad de resultado más alto rᵢ con nᵢ dados
             mat[idx, 1] = neg ? -nᵢ : nᵢ
             mat[idx, 2] = neg ? -rᵢ : rᵢ
             mat[idx, 3] = p
@@ -239,6 +239,61 @@ function highest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
         Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
 
 end
+
+
+#---------------------------------------------------------------------------------------------------
+# Roll lowest function
+#---------------------------------------------------------------------------------------------------
+
+"""
+lowest(n,dice;[name=dice.name])
+
+# Example
+```julia  
+    lowest(3,d8)
+```
+"""
+function lowest(n::Union{Int,UnitRange{Int}}, dice::StandardDice, mod::Int=0;
+    name::String=dice.name)
+
+    # reference: https://rpg.stackexchange.com/questions/107775/2-dice-pools-roll-matching-highest
+    A_parts = Matrix{Float64}[]
+
+    for nᵢ in n
+        if nᵢ == 0
+            continue
+        elseif nᵢ < 0 # Negative dice
+            neg = true
+            nᵢ = abs(nᵢ)
+        else
+            neg = false
+        end
+
+        mat = Matrix{Float64}(undef, length(dice.results), 3)
+        idx = 1
+        for rᵢ in dice.results
+            p = (((dice.sides - rᵢ + 1) / dice.sides)^nᵢ - ((dice.sides - rᵢ) / dice.sides)^nᵢ) * 100 # Probabilidad de resultado más bajo rᵢ con nᵢ dados
+            mat[idx, 1] = neg ? -nᵢ : nᵢ
+            mat[idx, 2] = neg ? -rᵢ : rᵢ
+            mat[idx, 3] = p
+            idx += 1
+        end
+
+        if neg
+            mat = sortslices(mat; dims=1, by=x -> x[end-1])
+        end
+        push!(A_parts, mat)
+    end
+
+    A = isempty(A_parts) ? Matrix{Float64}(undef, 0, 3) : reduce(vcat, A_parts)
+
+    # 3. Creates a DiceProbabilties Struct
+    cols = Symbol[Symbol(name), :Result, :Probability]
+    return DicePools.DicePool(cols, 1, A,
+        Dict([j => i for (i, j) in enumerate(cols)])) # Struct Table.jl compliant
+
+end
+
 
 #---------------------------------------------------------------------------------------------------
 # Overloading of Julia.Base arithmetic functions
